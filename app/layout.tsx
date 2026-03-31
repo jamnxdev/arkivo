@@ -1,21 +1,22 @@
-import "./globals.css"
+import "./globals.css";
 
-import { Geist, Geist_Mono, Inter } from "next/font/google"
+import { ClerkProvider, SignOutButton } from "@clerk/nextjs";
+import { Geist, Geist_Mono, Inter } from "next/font/google";
 
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils"
+import { ThemeProvider } from "@/components/theme-provider";
+import { cn } from "@/lib/utils";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
-})
+});
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
   return (
     <html
@@ -28,9 +29,11 @@ export default function RootLayout({
         inter.variable,
       )}
     >
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
+      <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
+        <body>
+          <ThemeProvider>{children}</ThemeProvider>
+        </body>
+      </ClerkProvider>
     </html>
-  )
+  );
 }
