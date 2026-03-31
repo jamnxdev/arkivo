@@ -1,7 +1,7 @@
 export default function DashboardLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode
+  children: React.ReactNode;
 }>) {
-  return <div className="p-6">{children}</div>
+  return <div className="p-6">{children}</div>;
 }

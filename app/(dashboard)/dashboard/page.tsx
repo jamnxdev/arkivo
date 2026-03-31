@@ -1,5 +1,5 @@
-import { Container } from "@/components/shared/container"
+import { Container } from "@/components/shared/container";
 
 export default function DashboardPage() {
-  return <Container>Dashboard</Container>
+  return <Container>Dashboard</Container>;
 }
