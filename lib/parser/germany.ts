@@ -35,7 +35,7 @@ export function extractDateTime(text: string) {
   const match = text.match(/(\d{2}\.\d{2}\.\d{4})\s*(\d{2}:\d{2})?/);
 
   if (!match) {
-    return { data: null, time: null };
+    return { date: null, time: null };
   }
 
   const [_, dateRaw, time] = match;
