@@ -1,6 +1,8 @@
+import { env } from "../env";
+
 export async function googleOCR(base64: string) {
   const res = await fetch(
-    `https://vision.googleapis.com/v1/images:annotate?key=${process.env.GOOGLE_VISION_API_KEY}`,
+    `https://vision.googleapis.com/v1/images:annotate?key=${env.GOOGLE_VISION_API_KEY}`,
     {
       method: "POST",
       body: JSON.stringify({

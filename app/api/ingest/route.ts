@@ -1,5 +1,5 @@
 import { getCurrentUser } from "@/lib/auth";
-import { parseReceipt } from "@/lib/parser/engine";
+import { ingestReceipt } from "@/lib/pipeline/ingest";
 import { receiptSchema } from "@/lib/validators";
 
 export async function POST(req: Request) {
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     });
   }
 
-  const parsed = parseReceipt(text);
+  const parsed = await ingestReceipt(text);
   const validated = receiptSchema.parse({
     ...parsed,
     raw_text: text,
