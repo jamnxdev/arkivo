@@ -1,3 +1,5 @@
+import type { PrasedReceipt } from "@/types/receipt";
+
 import {
   detectMerchat,
   extractDateTime,
@@ -5,7 +7,7 @@ import {
   extractTotal,
 } from "./germany";
 
-export function parseReceipt(text: string) {
+export function parseReceipt(text: string): PrasedReceipt {
   const merchant_brand = detectMerchat(text);
 
   const total = extractTotal(text);

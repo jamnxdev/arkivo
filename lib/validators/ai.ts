@@ -5,7 +5,7 @@ export const aiReceiptSchema = z.object({
   total: z.number().nullable(),
   date: z.string().nullable(),
 
-  category: z.string(),
+  category: z.string().nullable(),
 
   items: z.array(
     z.object({

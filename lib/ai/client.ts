@@ -1,8 +1,13 @@
 import { generateText, Output } from "ai";
 
+import type { PrasedReceipt } from "@/types/receipt";
+
 import { aiReceiptSchema } from "../validators/ai";
 
-export async function generateReceiptAI(input: { text: string; parsed: any }) {
+export async function generateReceiptAI(input: {
+  text: string;
+  parsed: PrasedReceipt;
+}) {
   const prompt = `You are a receipt processing system.
     Fix and enrich this receipt.
 
