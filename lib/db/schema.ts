@@ -1,4 +1,4 @@
-import type { InferSelectModel } from "drizzle-orm";
+import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import {
   jsonb,
   numeric,
@@ -9,17 +9,10 @@ import {
 } from "drizzle-orm/pg-core";
 
 export type Receipt = InferSelectModel<typeof receiptsTable>;
+export type ReceiptInsert = InferInsertModel<typeof receiptsTable>;
 
 export const usersTable = pgTable("users", {
-  id: uuid("id").defaultRandom().primaryKey(),
-
-  externalId: text("external_id").notNull(),
-  provider: text("provider").default("clerk"),
-
-  email: text("email"),
-  name: text("name"),
-  username: text("username"),
-
+  id: text("id").primaryKey(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
