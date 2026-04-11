@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import { createReceipt, getReceipts } from "@/lib/db/queries/receipts";
-import type { Receipt } from "@/lib/db/schema";
+import type { ReceiptInsert } from "@/lib/db/schema";
 
 export async function POST(req: Request) {
   const user = await getCurrentUser();
@@ -9,7 +9,7 @@ export async function POST(req: Request) {
     return Response.json({ success: false, error: "Unauthorized" });
   }
 
-  const body = (await req.json()) as Omit<Receipt, "userId">;
+  const body = (await req.json()) as Omit<ReceiptInsert, "userId">;
 
   const receipt = await createReceipt({
     userId: user.id,
