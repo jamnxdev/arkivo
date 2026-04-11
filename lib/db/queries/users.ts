@@ -4,31 +4,21 @@ import { db } from "@/lib/db";
 import { usersTable } from "@/lib/db/schema";
 
 export async function findOrCreateUser({
-  externalId,
-  email,
-  name,
-  username,
+  id,
 }: {
-  externalId: string;
-  email?: string;
-  name?: string;
-  username?: string;
+  id: string;
 }) {
   const existing = await db
     .select()
     .from(usersTable)
-    .where(eq(usersTable.externalId, externalId));
+    .where(eq(usersTable.id, id));
 
   if (existing.length > 0) return existing[0];
 
   const newUser = await db
     .insert(usersTable)
     .values({
-      externalId,
-      provider: "clerk",
-      email,
-      name,
-      username,
+      id,
     })
     .returning();
 

@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/lib/db";
 
-import type { Receipt } from "../schema";
+import type { Receipt, ReceiptInsert } from "../schema";
 import { receiptsTable } from "../schema";
 
 type UpdateReceiptInput = Partial<
@@ -18,7 +18,7 @@ type UpdateReceiptInput = Partial<
   >
 >;
 
-export async function createReceipt(data: Receipt) {
+export async function createReceipt(data: ReceiptInsert) {
   const result = await db.insert(receiptsTable).values(data).returning();
 
   return result[0];
