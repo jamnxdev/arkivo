@@ -18,6 +18,4 @@ export interface PrasedReceipt {
 
   items: ReceiptItem[];
   tax: Record<string, number>;
-
-  raw_text?: string;
 }

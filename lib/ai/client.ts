@@ -16,7 +16,6 @@ const receiptExtractionSchema = z.object({
   date: z.string().nullable(),
   time: z.string().nullable(),
   category: z.string().nullable(),
-  raw_text: z.string().nullable(),
   items: z
     .array(
       z.object({
@@ -49,14 +48,15 @@ Rules:
 - Return only values you can infer from the receipt image.
 - Use null for missing fields.
 - Keep numeric values as numbers, not strings.
+- The total must be the final payable amount, not the tendered or payment-method amount.
 - Use ISO date format YYYY-MM-DD when the date is visible.
 - Use 24-hour time format HH:mm when the time is visible.
 - Use item-level categories only when reasonably clear.
-- Put any OCR-like full receipt text into raw_text when available.
 - Assume currency is EUR unless the receipt clearly shows another currency.
 - Do not invent taxes or items.
 - No need to extract unnecessary details.
-- The total will be written as Zu Zahlen or whatever it is called in Germany.
+- Prefer totals labeled Zu Zahlen, Gesamtbetrag, Summe, Endbetrag, Rechnungsbetrag, Zahlbetrag, or equivalent final-payable wording.
+- Do not use Bar, Gegeben, change, Rückgeld, payment method labels, or tendered cash as the total unless they are the only visible final payable amount.
 - The whole receipt will be in German, so expect German words for merchant, total, date, time, etc.`,
           },
           {

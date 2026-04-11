@@ -1,6 +1,7 @@
 import { extractReceiptFromImage } from "@/lib/ai/client";
 import { getCurrentUser } from "@/lib/auth";
 import { createReceipt } from "@/lib/db/queries/receipts";
+import { normalizeReceiptTotal } from "@/lib/receipts/normalize-total";
 import { deleteCloudinaryAsset } from "@/lib/storage/cloudinary";
 import { receiptSchema } from "@/lib/validators";
 
@@ -98,17 +99,21 @@ export async function POST(req: Request) {
     });
 
     const validated = receiptSchema.parse(parsed);
+    const normalizedTotal = normalizeReceiptTotal({
+      total: validated.total,
+      items: validated.items,
+      tax: validated.tax,
+    });
 
     const saved = await createReceipt({
       userId: user.id,
       merchant: validated.merchant,
       merchantBrand: validated.merchant_brand,
-      total: validated.total?.toString() ?? null,
+      total: normalizedTotal?.toString() ?? null,
       currency: validated.currency,
       date: toReceiptDate(validated.date),
       time: validated.time,
       category: validated.category,
-      rawText: validated.raw_text ?? null,
       items: validated.items,
       tax: validated.tax,
       metadata: validated.metadata ?? null,

@@ -43,8 +43,6 @@ export const receiptsTable = pgTable("receipts", {
 
   category: text("category"),
 
-  rawText: text("raw_text"),
-
   items: jsonb("items"),
   tax: jsonb("tax"),
   metadata: jsonb("metadata"),
