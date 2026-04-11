@@ -7,7 +7,7 @@ export async function getCurrentUser() {
 
   if (!isAuthenticated && !userId) return null;
 
-  const user = await findOrCreateUser({ externalId: userId });
+  const user = await findOrCreateUser({ id: userId });
 
   return user;
 }
