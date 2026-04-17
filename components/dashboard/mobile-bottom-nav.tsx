@@ -2,9 +2,9 @@
 
 import {
   ChartBarIcon,
-  ChecksIcon,
+  FileTextIcon,
+  GearSixIcon,
   HouseIcon,
-  UserCircleIcon,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 
@@ -32,8 +32,8 @@ export function MobileBottomNav({ previewWidthClass }: MobileBottomNavProps) {
             type="button"
             className="flex h-16 w-full flex-col items-center justify-center gap-1 text-xs font-medium text-muted-foreground"
           >
-            <ChecksIcon size={20} weight="duotone" />
-            Tasks
+            <FileTextIcon size={20} weight="duotone" />
+            Receipts
           </button>
         </li>
         <li>
@@ -50,8 +50,8 @@ export function MobileBottomNav({ previewWidthClass }: MobileBottomNavProps) {
             type="button"
             className="flex h-16 w-full flex-col items-center justify-center gap-1 text-xs font-medium text-muted-foreground"
           >
-            <UserCircleIcon size={20} weight="duotone" />
-            Profile
+            <GearSixIcon size={20} weight="duotone" />
+            Settings
           </button>
         </li>
       </ul>
