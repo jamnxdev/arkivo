@@ -1,9 +1,9 @@
 import {
   ChartBarIcon,
-  FileTextIcon,
   GearSixIcon,
   HouseIcon,
   type Icon,
+  ReceiptIcon,
 } from "@phosphor-icons/react";
 
 export type DashboardNavItem = {
@@ -23,7 +23,7 @@ export const dashboardNavItems: DashboardNavItem[] = [
   {
     label: "Receipts",
     href: "/dashboard/receipts",
-    icon: FileTextIcon,
+    icon: ReceiptIcon,
     enabled: true,
   },
   {
