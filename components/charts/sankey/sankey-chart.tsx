@@ -2,7 +2,12 @@
 
 import { localPoint } from "@visx/event";
 import { ParentSize } from "@visx/responsive";
-import { sankey, sankeyCenter, sankeyLinkHorizontal } from "@visx/sankey";
+import {
+  sankey,
+  sankeyCenter,
+  type SankeyLink,
+  sankeyLinkHorizontal,
+} from "@visx/sankey";
 import {
   type ReactNode,
   useCallback,
@@ -107,18 +112,17 @@ function SankeyChartInner({
     return sankeyGenerator(clonedData);
   }, [data, sankeyGenerator]);
 
-  const createPath = useCallback(
-    // biome-ignore lint/suspicious/noExplicitAny: d3-sankey types are complex
-    (link: any) => {
-      try {
-        const pathGenerator = sankeyLinkHorizontal();
-        return pathGenerator(link) || "";
-      } catch {
-        return "";
-      }
-    },
-    [],
-  );
+  const createPath = useCallback((link: SankeyLink<SankeyNodeDatum, SankeyLinkDatum>) => {
+    try {
+      const pathGenerator = sankeyLinkHorizontal<
+        SankeyNodeDatum,
+        SankeyLinkDatum
+      >();
+      return pathGenerator(link) || "";
+    } catch {
+      return "";
+    }
+  }, []);
 
   const handleMouseMove = useCallback((event: React.MouseEvent) => {
     const point = localPoint(event);

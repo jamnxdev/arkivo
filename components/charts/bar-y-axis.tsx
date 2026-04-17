@@ -1,11 +1,14 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/utils";
 
 import { useChart } from "./chart-context";
+import { useChartPortalRoot } from "./use-chart-portal-root";
+import { useIsClient } from "./use-is-client";
 
 export interface BarYAxisProps {
   /** Whether to show all labels or skip some for dense data. Default: true */
@@ -68,13 +71,15 @@ export function BarYAxis({
     barXAccessor,
     data,
     hoveredBarIndex,
+    width,
+    height,
   } = useChart();
-  const [mounted, setMounted] = useState(false);
-
-  // Only render on client side after mount
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isClient = useIsClient();
+  const portalRoot = useChartPortalRoot(
+    containerRef,
+    isClient,
+    width + height,
+  );
 
   // Generate labels for each bar
   const labelsToShow = useMemo(() => {
@@ -108,9 +113,7 @@ export function BarYAxis({
     maxLabels,
   ]);
 
-  // Use portal to render into the chart container
-  const container = containerRef.current;
-  if (!(mounted && container)) {
+  if (!(isClient && portalRoot)) {
     return null;
   }
 
@@ -118,9 +121,6 @@ export function BarYAxis({
   if (!barScale) {
     return null;
   }
-
-  // Dynamic import to avoid SSR issues
-  const { createPortal } = require("react-dom") as typeof import("react-dom");
 
   return createPortal(
     <div
@@ -140,7 +140,7 @@ export function BarYAxis({
         />
       ))}
     </div>,
-    container,
+    portalRoot,
   );
 }
 

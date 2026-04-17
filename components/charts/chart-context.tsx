@@ -2,12 +2,8 @@
 
 import type { scaleBand, scaleLinear, scaleTime } from "@visx/scale";
 
-type ScaleLinear<Output, _Input = number> = ReturnType<
-  typeof scaleLinear<Output>
->;
-type ScaleTime<Output, _Input = Date | number> = ReturnType<
-  typeof scaleTime<Output>
->;
+type ScaleLinear<Output> = ReturnType<typeof scaleLinear<Output>>;
+type ScaleTime<Output> = ReturnType<typeof scaleTime<Output>>;
 type ScaleBand<Domain extends { toString(): string }> = ReturnType<
   typeof scaleBand<Domain>
 >;
@@ -74,8 +70,8 @@ export interface ChartContextValue {
   data: Record<string, unknown>[];
 
   // Scales
-  xScale: ScaleTime<number, number>;
-  yScale: ScaleLinear<number, number>;
+  xScale: ScaleTime<number>;
+  yScale: ScaleLinear<number>;
 
   // Dimensions
   width: number;
@@ -134,8 +130,6 @@ export interface ChartContextValue {
   // Candlestick chart specific (optional)
   /** Index of currently hovered candle */
   hoveredCandleIndex?: number | null;
-  /** Setter for hovered candle index */
-  setHoveredCandleIndex?: (index: number | null) => void;
 }
 
 const ChartContext = createContext<ChartContextValue | null>(null);

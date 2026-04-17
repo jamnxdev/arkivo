@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useSpring } from "motion/react";
-import { useMemo, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef } from "react";
 
 const TICKER_ITEM_HEIGHT = 24;
 
@@ -46,23 +46,28 @@ export function DateTicker({ currentIndex, labels, visible }: DateTickerProps) {
     return monthIndices.uniqueMonths.indexOf(currentMonth || "");
   }, [currentIndex, parsedLabels, monthIndices]);
 
-  // Track previous month index
+  // Track previous month index (updated in layout effect only)
   const prevMonthIndexRef = useRef(-1);
 
   // Animated Y offsets
   const dayY = useSpring(0, { stiffness: 400, damping: 35 });
   const monthY = useSpring(0, { stiffness: 400, damping: 35 });
 
-  dayY.set(-currentIndex * TICKER_ITEM_HEIGHT);
+  useLayoutEffect(() => {
+    dayY.set(-currentIndex * TICKER_ITEM_HEIGHT);
+  }, [currentIndex, dayY]);
 
-  if (currentMonthIndex >= 0) {
+  useLayoutEffect(() => {
+    if (currentMonthIndex < 0) {
+      return;
+    }
     const isFirstRender = prevMonthIndexRef.current === -1;
     const monthChanged = prevMonthIndexRef.current !== currentMonthIndex;
     if (isFirstRender || monthChanged) {
       monthY.set(-currentMonthIndex * TICKER_ITEM_HEIGHT);
       prevMonthIndexRef.current = currentMonthIndex;
     }
-  }
+  }, [currentMonthIndex, monthY]);
 
   if (!visible || labels.length === 0) {
     return null;

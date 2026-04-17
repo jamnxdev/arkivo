@@ -3,9 +3,8 @@
 import { curveNatural } from "@visx/curve";
 import { LinePath } from "@visx/shape";
 
-// CurveFactory type - simplified version compatible with visx
-// biome-ignore lint/suspicious/noExplicitAny: d3 curve factory type
-type CurveFactory = any;
+/** d3 / visx curve generator (e.g. curveNatural). */
+type CurveFactory = typeof curveNatural;
 
 import { motion, useMotionTemplate, useSpring } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";

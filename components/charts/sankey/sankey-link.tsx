@@ -129,7 +129,7 @@ function AnimatedLink({
       const length = pathRef.current.getTotalLength();
       setPathLength(length);
     }
-  });
+  }, [path]);
 
   // Trigger animation after stagger delay
   useEffect(() => {

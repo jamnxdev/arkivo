@@ -1,9 +1,12 @@
 "use client";
 
 import { motion, useSpring } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { createPortal } from "react-dom";
 
 import { chartCssVars, useChart } from "../chart-context";
+import { useChartPortalRoot } from "../use-chart-portal-root";
+import { useIsClient } from "../use-is-client";
 import { DateTicker } from "./date-ticker";
 import { TooltipBox } from "./tooltip-box";
 import { TooltipContent, type TooltipRow } from "./tooltip-content";
@@ -65,12 +68,12 @@ export function ChartTooltip({
 
   const isHorizontal = orientation === "horizontal";
 
-  const [mounted, setMounted] = useState(false);
-
-  // Only render portals on client side after mount
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isClient = useIsClient();
+  const portalRoot = useChartPortalRoot(
+    containerRef,
+    isClient,
+    width + height,
+  );
 
   const visible = tooltipData !== null;
   const x = tooltipData?.x ?? 0;
@@ -136,15 +139,9 @@ export function ChartTooltip({
     });
   }, [tooltipData, barXAccessor, xAccessor]);
 
-  // Use portal to render into the chart container
-  // Only render after mount on client side
-  const container = containerRef.current;
-  if (!(mounted && container)) {
+  if (!(isClient && portalRoot)) {
     return null;
   }
-
-  // Dynamic import to avoid SSR issues
-  const { createPortal } = require("react-dom") as typeof import("react-dom");
 
   const tooltipContent = (
     <>
@@ -237,7 +234,7 @@ export function ChartTooltip({
     </>
   );
 
-  return createPortal(tooltipContent, container);
+  return createPortal(tooltipContent, portalRoot);
 }
 
 ChartTooltip.displayName = "ChartTooltip";

@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 
 import type { BarProps } from "./bar";
 import {
+  type ChartContextValue,
   ChartProvider,
   type LineConfig,
   type Margin,
@@ -282,15 +283,18 @@ function ChartInner({
     [data, categoryAccessor],
   );
 
-  // Create a fake time scale for compatibility with ChartContext
+  // Stable fake time scale for ChartContext (avoid impure Date.now during render)
   const fakeTimeScale = useMemo(() => {
-    const now = Date.now();
-    const start = now - data.length * 24 * 60 * 60 * 1000;
+    const DAY_MS = 24 * 60 * 60 * 1000;
+    const span = Math.max(1, data.length) * DAY_MS;
+    const endMs = 1_700_000_000_000;
+    const startMs = endMs - span;
     const scale = {
       ...categoryScale,
-      domain: () => [new Date(start), new Date(now)],
+      domain: () => [new Date(startMs), new Date(endMs)],
       range: () => [0, innerWidth] as [number, number],
-      invert: (x: number) => new Date(start + (x / innerWidth) * (now - start)),
+      invert: (x: number) =>
+        new Date(startMs + (x / innerWidth) * (endMs - startMs)),
       copy: () => scale,
     };
     return scale;
@@ -478,9 +482,7 @@ function ChartInner({
 
   const contextValue = {
     data,
-    xScale: fakeTimeScale as unknown as ReturnType<
-      typeof import("@visx/scale").scaleTime<number>
-    >,
+    xScale: fakeTimeScale as unknown as ChartContextValue["xScale"],
     yScale: valueScale,
     width,
     height,

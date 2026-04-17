@@ -3,9 +3,8 @@
 import { curveMonotoneX } from "@visx/curve";
 import { AreaClosed, LinePath } from "@visx/shape";
 
-// CurveFactory type - simplified version compatible with visx
-// biome-ignore lint/suspicious/noExplicitAny: d3 curve factory type
-type CurveFactory = any;
+/** d3 / visx curve generator (e.g. curveMonotoneX). */
+type CurveFactory = typeof curveMonotoneX;
 
 import { motion, useMotionTemplate, useSpring } from "motion/react";
 import {

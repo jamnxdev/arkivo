@@ -2,7 +2,7 @@
 
 import { Arc, arc as arcGenerator } from "@visx/shape";
 import { motion, useSpring, useTransform } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 
 import { ringCssVars, useRing } from "./ring-context";
 
@@ -159,20 +159,17 @@ export function Ring({
 
   const arcRange = ctxEndAngle - ctxStartAngle;
 
-  // Track if initial mount animation is complete (must be before early return)
-  const hasAnimated = useRef(false);
+  const [hasPlayedIntro, setHasPlayedIntro] = useState(false);
   const ringExpandDelay = index * 0.08;
 
   useEffect(() => {
-    if (animate && !hasAnimated.current) {
-      const timeout = setTimeout(
-        () => {
-          hasAnimated.current = true;
-        },
-        (ringExpandDelay + 0.3) * 1000,
-      );
-      return () => clearTimeout(timeout);
+    if (!animate) {
+      return;
     }
+    const timeout = setTimeout(() => {
+      setHasPlayedIntro(true);
+    }, (ringExpandDelay + 0.3) * 1000);
+    return () => clearTimeout(timeout);
   }, [animate, ringExpandDelay]);
 
   const ringData = data[index];
@@ -190,7 +187,7 @@ export function Ring({
   const isPushedOut = hoveredIndex !== null && hoveredIndex < index;
 
   // Only apply delay on initial mount, not on hover changes
-  const shouldDelay = animate && !hasAnimated.current;
+  const shouldDelay = animate && !hasPlayedIntro;
 
   // Calculate scale for background and progress arcs
   const getScale = () => {

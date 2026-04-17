@@ -87,9 +87,6 @@ function ChartInner({
   containerRef,
 }: ChartInnerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [hoveredCandleIndex, setHoveredCandleIndex] = useState<number | null>(
-    null,
-  );
 
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
@@ -195,11 +192,6 @@ function ChartInner({
     canInteract: isLoaded,
   });
 
-  // Sync hovered candle index from tooltip (so Candlestick can fade others)
-  useEffect(() => {
-    setHoveredCandleIndex(tooltipData?.index ?? null);
-  }, [tooltipData?.index]);
-
   if (width < 10 || height < 10) {
     return null;
   }
@@ -253,8 +245,7 @@ function ChartInner({
     selection: selection ?? null,
     clearSelection,
     bandWidth,
-    hoveredCandleIndex,
-    setHoveredCandleIndex,
+    hoveredCandleIndex: tooltipData?.index ?? null,
   };
 
   return (

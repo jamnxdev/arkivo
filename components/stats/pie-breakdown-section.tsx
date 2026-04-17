@@ -20,8 +20,6 @@ import type {
   ViewKey,
 } from "@/types/stats-types";
 
-const VIEWS: ViewKey[] = ["overview", "category", "payment", "forecast"];
-
 export function PieBreakdownSection() {
   const [view, setView] = useState<ViewKey>("category");
   const [metric, setMetric] = useState<MetricMode>("amount");

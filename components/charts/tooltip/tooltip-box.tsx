@@ -2,9 +2,13 @@
 
 import { motion, useSpring } from "motion/react";
 import type { RefObject } from "react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/utils";
+
+import { useChartPortalRoot } from "../use-chart-portal-root";
+import { useIsClient } from "../use-is-client";
 
 // Spring config for smooth tooltip movement
 const springConfig = { stiffness: 100, damping: 20 };
@@ -51,19 +55,19 @@ export function TooltipBox({
   flipped: flippedOverride,
 }: TooltipBoxProps) {
   const tooltipRef = useRef<HTMLDivElement>(null);
-  const tooltipWidthRef = useRef(180);
-  const tooltipHeightRef = useRef(80);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const [tooltipDims, setTooltipDims] = useState({ w: 180, h: 80 });
+  const isClient = useIsClient();
+  const portalRoot = useChartPortalRoot(
+    containerRef,
+    isClient,
+    containerWidth + containerHeight,
+  );
 
   const animatedLeft = useSpring(x + offset, springConfig);
   const animatedTop = useSpring(y, springConfig);
 
-  const tw = tooltipWidthRef.current;
-  const th = tooltipHeightRef.current;
+  const tw = tooltipDims.w;
+  const th = tooltipDims.h;
   const shouldFlipX = x + tw + offset > containerWidth;
   const targetX = shouldFlipX ? x - offset - tw : x + offset;
   const targetY = Math.max(
@@ -85,14 +89,11 @@ export function TooltipBox({
     const el = tooltipRef.current;
     const w = el.offsetWidth;
     const h = el.offsetHeight;
-    if (w > 0) {
-      tooltipWidthRef.current = w;
-    }
-    if (h > 0) {
-      tooltipHeightRef.current = h;
-    }
-    const w2 = tooltipWidthRef.current;
-    const h2 = tooltipHeightRef.current;
+    const w2 = w > 0 ? w : tooltipDims.w;
+    const h2 = h > 0 ? h : tooltipDims.h;
+    requestAnimationFrame(() => {
+      setTooltipDims({ w: w2, h: h2 });
+    });
     const flip = x + w2 + offset > containerWidth;
     const tx = flip ? x - offset - w2 : x + offset;
     const ty = Math.max(
@@ -116,29 +117,18 @@ export function TooltipBox({
     topOverride,
     animatedLeft,
     animatedTop,
+    tooltipDims.w,
+    tooltipDims.h,
   ]);
-
-  const prevFlipRef = useRef(shouldFlipX);
-  const [flipKey, setFlipKey] = useState(0);
-
-  useEffect(() => {
-    if (prevFlipRef.current !== shouldFlipX) {
-      setFlipKey((k) => k + 1);
-      prevFlipRef.current = shouldFlipX;
-    }
-  }, [shouldFlipX]);
 
   const finalLeft = leftOverride ?? animatedLeft;
   const finalTop = topOverride ?? animatedTop;
   const isFlipped = flippedOverride ?? shouldFlipX;
   const transformOrigin = isFlipped ? "right top" : "left top";
 
-  const container = containerRef.current;
-  if (!(mounted && container)) {
+  if (!(isClient && portalRoot)) {
     return null;
   }
-
-  const { createPortal } = require("react-dom") as typeof import("react-dom");
 
   if (!visible) {
     return null;
@@ -158,14 +148,14 @@ export function TooltipBox({
         animate={{ scale: 1, opacity: 1, x: 0 }}
         className="min-w-[140px] overflow-hidden rounded-lg bg-popover text-popover-foreground shadow-lg backdrop-blur-md"
         initial={{ scale: 0.85, opacity: 0, x: isFlipped ? 20 : -20 }}
-        key={flipKey}
+        key={shouldFlipX ? "flip" : "noflip"}
         style={{ transformOrigin }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
       >
         {children}
       </motion.div>
     </motion.div>,
-    container,
+    portalRoot,
   );
 }
 

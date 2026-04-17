@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { createPortal } from "react-dom";
 
 import { useChart } from "./chart-context";
+import { useChartPortalRoot } from "./use-chart-portal-root";
+import { useIsClient } from "./use-is-client";
 
 export interface YAxisProps {
   /** Number of ticks to show. Default: 5 */
@@ -32,15 +35,16 @@ export function YAxis({
   formatLargeNumbers = true,
   formatValue,
 }: YAxisProps) {
-  const { yScale, margin, containerRef } = useChart();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { yScale, margin, containerRef, width, height } = useChart();
+  const isClient = useIsClient();
+  const portalRoot = useChartPortalRoot(
+    containerRef,
+    isClient,
+    width + height,
+  );
 
   const ticks = useMemo(() => {
-    const tickValues = yScale.ticks(numTicks);
+    const tickValues: number[] = yScale.ticks(numTicks);
     return tickValues.map((value) => ({
       value,
       y: (yScale(value) ?? 0) + margin.top,
@@ -48,12 +52,9 @@ export function YAxis({
     }));
   }, [yScale, margin.top, numTicks, formatLargeNumbers, formatValue]);
 
-  const container = containerRef.current;
-  if (!(mounted && container)) {
+  if (!(isClient && portalRoot)) {
     return null;
   }
-
-  const { createPortal } = require("react-dom") as typeof import("react-dom");
 
   return createPortal(
     <div
@@ -70,7 +71,7 @@ export function YAxis({
         </div>
       ))}
     </div>,
-    container,
+    portalRoot,
   );
 }
 

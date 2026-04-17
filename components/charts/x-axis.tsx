@@ -1,10 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/utils";
 
 import { useChart } from "./chart-context";
+import { useChartPortalRoot } from "./use-chart-portal-root";
+import { useIsClient } from "./use-is-client";
 
 export interface XAxisProps {
   /** Number of ticks to show (including first and last). Default: 5 */
@@ -69,13 +72,14 @@ function XAxisLabel({
 }
 
 export function XAxis({ numTicks = 5, tickerHalfWidth = 50 }: XAxisProps) {
-  const { xScale, margin, tooltipData, containerRef } = useChart();
-  const [mounted, setMounted] = useState(false);
-
-  // Only render on client side after mount
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const { xScale, margin, tooltipData, containerRef, width, height } =
+    useChart();
+  const isClient = useIsClient();
+  const portalRoot = useChartPortalRoot(
+    containerRef,
+    isClient,
+    width + height,
+  );
 
   // Generate evenly spaced tick values, always including first and last dates
   const labelsToShow = useMemo(() => {
@@ -114,15 +118,9 @@ export function XAxis({ numTicks = 5, tickerHalfWidth = 50 }: XAxisProps) {
   const isHovering = tooltipData !== null;
   const crosshairX = tooltipData ? tooltipData.x + margin.left : null;
 
-  // Use portal to render into the chart container
-  // Only render after mount on client side
-  const container = containerRef.current;
-  if (!(mounted && container)) {
+  if (!(isClient && portalRoot)) {
     return null;
   }
-
-  // Dynamic import to avoid SSR issues
-  const { createPortal } = require("react-dom") as typeof import("react-dom");
 
   return createPortal(
     <div className="pointer-events-none absolute inset-0">
@@ -137,7 +135,7 @@ export function XAxis({ numTicks = 5, tickerHalfWidth = 50 }: XAxisProps) {
         />
       ))}
     </div>,
-    container,
+    portalRoot,
   );
 }
 
