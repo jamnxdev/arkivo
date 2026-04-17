@@ -10,10 +10,10 @@ import { useMediaQuery } from "@/hooks/use-media-query";
 import { env } from "@/lib/env";
 
 export default function DashboardPage() {
-  const isTabletViewport = env.DEV
-    ? true
-    : useMediaQuery("(max-width: 1023px)");
+  let isTabletViewport = useMediaQuery("(max-width: 1023px)");
   const previewWidthClass = isTabletViewport ? "w-full" : "max-w-2xl";
+
+  isTabletViewport = env.DEV;
 
   return (
     <div className="min-h-screen">
