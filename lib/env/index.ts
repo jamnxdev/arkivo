@@ -10,4 +10,6 @@ export const env = {
   CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY!,
   CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET!,
   GEMINI_API_KEY: process.env.GEMINI_API_KEY!,
+  DEV: process.env.NODE_ENV === "development",
+  PROD: process.env.NODE_ENV === "production"
 };
