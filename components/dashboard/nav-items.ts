@@ -28,9 +28,9 @@ export const dashboardNavItems: DashboardNavItem[] = [
   },
   {
     label: "Stats",
-    href: "/stats",
+    href: "/dashboard/stats",
     icon: ChartBarIcon,
-    enabled: false,
+    enabled: true,
   },
   {
     label: "Settings",
