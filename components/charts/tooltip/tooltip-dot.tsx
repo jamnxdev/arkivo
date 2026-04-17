@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useSpring } from "motion/react";
+
 import { chartCssVars } from "../chart-context";
 
 // Faster spring to stay in sync with indicator

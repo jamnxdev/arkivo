@@ -20,13 +20,13 @@ import {
   buildOrderedTrendChart,
   summarizeTrendChartSeries,
 } from "@/components/stats/stats-series";
+import { Button } from "@/components/ui/button";
 import type {
   AreaVisualMode,
   DateRangePreset,
   TimeGrain,
   TrendAreaMode,
 } from "@/types/stats-types";
-import { Button } from "@/components/ui/button";
 
 export function AreaSpendingTrendSection() {
   const [range, setRange] = useState<DateRangePreset>("90d");

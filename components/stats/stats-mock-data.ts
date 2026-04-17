@@ -71,7 +71,7 @@ function buildMockDaily(): SpendingPoint[] {
     out.push({
       date,
       spending: Math.round(
-        480 + Math.sin(i * 0.11) * 140 + (i % 11) * 18 + (i % 7) * 22
+        480 + Math.sin(i * 0.11) * 140 + (i % 11) * 18 + (i % 7) * 22,
       ),
       receipts: 10 + (i % 13) + Math.floor((i % 44) / 11),
     });

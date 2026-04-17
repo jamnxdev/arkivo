@@ -6,11 +6,11 @@ export {
 export {
   type Margin,
   type SankeyContextValue,
+  sankeyCssVars,
   type SankeyLinkDatum,
   type SankeyNodeDatum,
   SankeyProvider,
   type SankeyTooltipData,
-  sankeyCssVars,
   useSankey,
 } from "./sankey-context";
 export { SankeyLink, type SankeyLinkProps } from "./sankey-link";

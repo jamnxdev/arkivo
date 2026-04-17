@@ -3,6 +3,7 @@
 import type { SankeyNode as SankeyNodeType } from "d3-sankey";
 import { motion } from "motion/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+
 import {
   type SankeyLinkDatum,
   type SankeyNodeDatum,
@@ -31,7 +32,7 @@ export interface SankeyNodeProps {
   /** Custom node color function */
   getNodeColor?: (
     node: SankeyNodeType<SankeyNodeDatum, SankeyLinkDatum>,
-    index: number
+    index: number,
   ) => string;
 }
 
@@ -206,7 +207,7 @@ function AnimatedNode({
               opacity: nameOpacity,
               x: nameLabelX,
             }}
-            className="fill-foreground font-medium text-[13px]"
+            className="fill-foreground text-[13px] font-medium"
             dy="0.35em"
             initial={{ opacity: 0, x: isLeftSide ? x + 8 : x + width - 8 }}
             textAnchor={isLeftSide ? "end" : "start"}
@@ -263,14 +264,14 @@ export function SankeyNode({
       "var(--chart-4)",
       "var(--chart-5)",
     ],
-    []
+    [],
   );
 
   // Get color for a node
   const getColor = useCallback(
     (
       node: SankeyNodeType<SankeyNodeDatum, SankeyLinkDatum>,
-      index: number
+      index: number,
     ): string => {
       if (fill) {
         return fill;
@@ -281,7 +282,7 @@ export function SankeyNode({
 
       return defaultColors[index % defaultColors.length] ?? "var(--chart-1)";
     },
-    [fill, getNodeColorProp, defaultColors]
+    [fill, getNodeColorProp, defaultColors],
   );
 
   // Check if a node is connected to the hovered element
@@ -311,7 +312,7 @@ export function SankeyNode({
       }
       return false;
     },
-    [hoveredNodeIndex, hoveredLinkIndex, links]
+    [hoveredNodeIndex, hoveredLinkIndex, links],
   );
 
   const isAnyHovered = hoveredNodeIndex !== null || hoveredLinkIndex !== null;

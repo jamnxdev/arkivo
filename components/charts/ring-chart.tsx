@@ -11,7 +11,9 @@ import {
   useRef,
   useState,
 } from "react";
+
 import { cn } from "@/lib/utils";
+
 import {
   defaultRingColors,
   type RingContextValue,
@@ -102,7 +104,7 @@ function RingChartInner({
         setInternalHoveredIndex(index);
       }
     },
-    [isControlled, onHoverChange]
+    [isControlled, onHoverChange],
   );
 
   // Use the smaller dimension to ensure the chart fits
@@ -132,7 +134,7 @@ function RingChartInner({
   // Calculate total value
   const totalValue = useMemo(
     () => data.reduce((sum, d) => sum + d.value, 0),
-    [data]
+    [data],
   );
 
   // Get color for a ring index
@@ -144,7 +146,7 @@ function RingChartInner({
       }
       return defaultRingColors[index % defaultRingColors.length] as string;
     },
-    [data]
+    [data],
   );
 
   // Get ring radii for an index
@@ -154,7 +156,7 @@ function RingChartInner({
       const outerRadius = innerRadius + strokeWidth;
       return { innerRadius, outerRadius };
     },
-    [baseInnerRadius, strokeWidth, ringGap]
+    [baseInnerRadius, strokeWidth, ringGap],
   );
 
   // Mark as loaded after initial render

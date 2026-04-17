@@ -3,11 +3,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { usersTable } from "@/lib/db/schema";
 
-export async function findOrCreateUser({
-  id,
-}: {
-  id: string;
-}) {
+export async function findOrCreateUser({ id }: { id: string }) {
   const existing = await db
     .select()
     .from(usersTable)

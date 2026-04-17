@@ -1,6 +1,7 @@
 "use client";
 
 import type { SankeyLink, SankeyNode } from "d3-sankey";
+
 import { TooltipBox } from "../tooltip/tooltip-box";
 import { TooltipContent, type TooltipRow } from "../tooltip/tooltip-content";
 import {
@@ -122,11 +123,11 @@ export function SankeyTooltip({
     // Get source and target names
     const sourceName = getNodeName(
       link.source as NodeOrIndex,
-      tooltipData.linkIndex
+      tooltipData.linkIndex,
     );
     const targetName = getNodeName(
       link.target as NodeOrIndex,
-      tooltipData.linkIndex
+      tooltipData.linkIndex,
     );
 
     // Custom content

@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { useMemo } from "react";
+
 import { useChart } from "./chart-context";
 
 const DEFAULT_POSITIVE = "url(#candlestick-positive)";
@@ -178,7 +179,7 @@ export function Candlestick({
       duration: 0.4,
       ease: "easeInOut" as const,
     }),
-    []
+    [],
   );
 
   return (

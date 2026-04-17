@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { useEffect, useId, useMemo, useState } from "react";
+
 import { chartCssVars, useChart } from "./chart-context";
 
 export type BarLineCap = "round" | "butt" | number;
@@ -76,7 +77,7 @@ function AnimatedBar({
       () => {
         setIsAnimated(true);
       },
-      index * staggerDelay * 1000
+      index * staggerDelay * 1000,
     );
     return () => clearTimeout(timeout);
   }, [index, staggerDelay]);

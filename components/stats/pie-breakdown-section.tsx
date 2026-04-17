@@ -12,13 +12,13 @@ import {
   STATS_VIEW_KEYS,
 } from "@/components/stats/stats-mock-data";
 import { StatsSectionCard } from "@/components/stats/stats-section-card";
+import { Button } from "@/components/ui/button";
 import type {
   MetricMode,
   PieHoleSize,
   TopCount,
   ViewKey,
 } from "@/types/stats-types";
-import { Button } from "@/components/ui/button";
 
 const VIEWS: ViewKey[] = ["overview", "category", "payment", "forecast"];
 

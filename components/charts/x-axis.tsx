@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
 import { cn } from "@/lib/utils";
+
 import { useChart } from "./chart-context";
 
 export interface XAxisProps {
@@ -54,7 +56,7 @@ function XAxisLabel({
       }}
     >
       <span
-        className={cn("whitespace-nowrap text-chart-label text-xs")}
+        className={cn("text-xs whitespace-nowrap text-chart-label")}
         style={{
           opacity,
           transition: "opacity 0.4s ease-in-out",
@@ -135,7 +137,7 @@ export function XAxis({ numTicks = 5, tickerHalfWidth = 50 }: XAxisProps) {
         />
       ))}
     </div>,
-    container
+    container,
   );
 }
 

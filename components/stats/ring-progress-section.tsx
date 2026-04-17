@@ -12,13 +12,13 @@ import {
   STATS_VIEW_KEYS,
 } from "@/components/stats/stats-mock-data";
 import { StatsSectionCard } from "@/components/stats/stats-section-card";
+import { Button } from "@/components/ui/button";
 import type {
   MetricMode,
   RingScale,
   RingTopMode,
   ViewKey,
 } from "@/types/stats-types";
-import { Button } from "@/components/ui/button";
 
 export function RingProgressSection() {
   const [view, setView] = useState<ViewKey>("payment");

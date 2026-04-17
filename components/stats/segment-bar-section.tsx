@@ -16,6 +16,7 @@ import {
   STATS_VIEW_KEYS,
 } from "@/components/stats/stats-mock-data";
 import { StatsSectionCard } from "@/components/stats/stats-section-card";
+import { Button } from "@/components/ui/button";
 import type {
   BarOrientation,
   MetricMode,
@@ -23,7 +24,6 @@ import type {
   TopNMode,
   ViewKey,
 } from "@/types/stats-types";
-import { Button } from "@/components/ui/button";
 
 export function SegmentBarSection() {
   const [view, setView] = useState<ViewKey>("overview");

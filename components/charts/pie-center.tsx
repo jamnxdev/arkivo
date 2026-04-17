@@ -2,7 +2,9 @@
 
 import NumberFlow from "@number-flow/react";
 import type { ReactNode } from "react";
+
 import { cn } from "@/lib/utils";
+
 import { usePie } from "./pie-context";
 
 // NumberFlow format - subset of Intl.NumberFormatOptions
@@ -110,7 +112,7 @@ export function PieCenter({
     <div
       className={cn(
         "flex flex-col items-center justify-center text-center",
-        className
+        className,
       )}
       style={{ width: centerSize, height: centerSize }}
     >

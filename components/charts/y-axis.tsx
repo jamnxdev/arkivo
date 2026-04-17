@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+
 import { useChart } from "./chart-context";
 
 export interface YAxisProps {
@@ -15,7 +16,7 @@ export interface YAxisProps {
 function formatLabel(
   value: number,
   formatLargeNumbers: boolean,
-  formatValue?: (value: number) => string
+  formatValue?: (value: number) => string,
 ): string {
   if (formatValue) {
     return formatValue(value);
@@ -65,11 +66,11 @@ export function YAxis({
           key={tick.value}
           style={{ top: tick.y, transform: "translateY(-50%)" }}
         >
-          <span className="text-chart-label text-xs">{tick.label}</span>
+          <span className="text-xs text-chart-label">{tick.label}</span>
         </div>
       ))}
     </div>,
-    container
+    container,
   );
 }
 

@@ -14,7 +14,9 @@ import {
   useRef,
   useState,
 } from "react";
+
 import { cn } from "@/lib/utils";
+
 import { ChartProvider, type LineConfig, type Margin } from "./chart-context";
 import { useChartInteraction } from "./use-chart-interaction";
 
@@ -86,7 +88,7 @@ function ChartInner({
 }: ChartInnerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hoveredCandleIndex, setHoveredCandleIndex] = useState<number | null>(
-    null
+    null,
   );
 
   const innerWidth = width - margin.left - margin.right;
@@ -97,12 +99,12 @@ function ChartInner({
       const value = d[xDataKey];
       return value instanceof Date ? value : new Date(value as string | number);
     },
-    [xDataKey]
+    [xDataKey],
   );
 
   const bisectDate = useMemo(
     () => bisector<Record<string, unknown>, Date>((d) => xAccessor(d)).left,
-    [xAccessor]
+    [xAccessor],
   );
 
   const slotCount =
@@ -156,7 +158,7 @@ function ChartInner({
     () => [
       { dataKey: "close", stroke: "var(--chart-line-primary)", strokeWidth: 0 },
     ],
-    []
+    [],
   );
 
   const dateLabels = useMemo(
@@ -165,9 +167,9 @@ function ChartInner({
         xAccessor(d).toLocaleDateString("en-US", {
           month: "short",
           day: "numeric",
-        })
+        }),
       ),
-    [data, xAccessor]
+    [data, xAccessor],
   );
 
   useEffect(() => {

@@ -2,7 +2,9 @@
 
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
+
 import { cn } from "@/lib/utils";
+
 import { useChart } from "./chart-context";
 
 export interface BarXAxisProps {
@@ -56,7 +58,7 @@ function BarXAxisLabel({
     >
       <motion.span
         animate={{ opacity }}
-        className={cn("whitespace-nowrap text-chart-label text-xs")}
+        className={cn("text-xs whitespace-nowrap text-chart-label")}
         initial={{ opacity: 1 }}
         transition={{ duration: 0.4, ease: "easeInOut" }}
       >
@@ -149,7 +151,7 @@ export function BarXAxis({
         />
       ))}
     </div>,
-    container
+    container,
   );
 }
 

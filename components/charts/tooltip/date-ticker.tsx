@@ -80,7 +80,7 @@ export function DateTicker({ currentIndex, labels, visible }: DateTickerProps) {
                   className="flex h-6 shrink-0 items-center justify-center"
                   key={month}
                 >
-                  <span className="whitespace-nowrap font-medium text-sm">
+                  <span className="text-sm font-medium whitespace-nowrap">
                     {month}
                   </span>
                 </div>
@@ -96,7 +96,7 @@ export function DateTicker({ currentIndex, labels, visible }: DateTickerProps) {
                   className="flex h-6 shrink-0 items-center justify-center"
                   key={label.full}
                 >
-                  <span className="whitespace-nowrap font-medium text-sm">
+                  <span className="text-sm font-medium whitespace-nowrap">
                     {label.day}
                   </span>
                 </div>

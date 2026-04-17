@@ -2,7 +2,9 @@
 
 import NumberFlow from "@number-flow/react";
 import type { ReactNode } from "react";
+
 import { cn } from "@/lib/utils";
+
 import { useRing } from "./ring-context";
 
 // NumberFlow format - subset of Intl.NumberFormatOptions
@@ -105,7 +107,7 @@ export function RingCenter({
     <div
       className={cn(
         "flex flex-col items-center justify-center text-center",
-        className
+        className,
       )}
       style={{ width: centerSize, height: centerSize }}
     >

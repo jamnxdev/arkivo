@@ -11,7 +11,9 @@ import {
   useRef,
   useState,
 } from "react";
+
 import { cn } from "@/lib/utils";
+
 import {
   type Margin,
   type SankeyLinkDatum,
@@ -70,10 +72,10 @@ function SankeyChartInner({
   const [hoveredNodeIndex, setHoveredNodeIndex] = useState<number | null>(null);
   const [hoveredLinkIndex, setHoveredLinkIndex] = useState<number | null>(null);
   const [tooltipData, setTooltipData] = useState<SankeyTooltipData | null>(
-    null
+    null,
   );
   const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(
-    null
+    null,
   );
 
   const innerWidth = width - margin.left - margin.right;
@@ -115,7 +117,7 @@ function SankeyChartInner({
         return "";
       }
     },
-    []
+    [],
   );
 
   const handleMouseMove = useCallback((event: React.MouseEvent) => {

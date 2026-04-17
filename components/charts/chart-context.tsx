@@ -19,6 +19,7 @@ import {
   type SetStateAction,
   useContext,
 } from "react";
+
 import type { ChartSelection } from "./use-chart-interaction";
 
 // CSS variable references for theming
@@ -156,7 +157,7 @@ export function useChart(): ChartContextValue {
   if (!context) {
     throw new Error(
       "useChart must be used within a ChartProvider. " +
-        "Make sure your component is wrapped in <LineChart>, <AreaChart>, or <BarChart>."
+        "Make sure your component is wrapped in <LineChart>, <AreaChart>, or <BarChart>.",
     );
   }
   return context;

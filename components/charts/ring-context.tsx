@@ -90,7 +90,7 @@ export function useRing(): RingContextValue {
   if (!context) {
     throw new Error(
       "useRing must be used within a RingProvider. " +
-        "Make sure your component is wrapped in <RingChart>."
+        "Make sure your component is wrapped in <RingChart>.",
     );
   }
   return context;

@@ -2,6 +2,7 @@
 
 import { motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
+
 import { radarCssVars, useRadar } from "./radar-context";
 
 export interface RadarAreaProps {
@@ -91,7 +92,7 @@ export function RadarArea({
             return newPositions;
           });
         },
-        (animationDelay + i * metricStagger) * 1000
+        (animationDelay + i * metricStagger) * 1000,
       );
       timeouts.push(timeout);
     }
@@ -101,7 +102,7 @@ export function RadarArea({
       () => {
         hasAnimated.current = true;
       },
-      (animationDelay + metrics.length * metricStagger) * 1000 + 500
+      (animationDelay + metrics.length * metricStagger) * 1000 + 500,
     );
     timeouts.push(completeTimeout);
 

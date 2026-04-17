@@ -78,7 +78,8 @@ export function UploadButton({ onUploadComplete }: UploadButtonProps) {
         throw new Error("Failed to upload receipt image");
       }
 
-      uploadedPublicId = uploadPayload.public_id ?? signaturePayload.data.publicId;
+      uploadedPublicId =
+        uploadPayload.public_id ?? signaturePayload.data.publicId;
 
       const res = await fetch("/api/ingest", {
         method: "POST",
@@ -133,15 +134,15 @@ export function UploadButton({ onUploadComplete }: UploadButtonProps) {
             onClick={() => inputRef.current?.click()}
             disabled={isUploading}
           >
-            {isUploading ? "Uploading and processing..." : "Select a receipt image"}
+            {isUploading
+              ? "Uploading and processing..."
+              : "Select a receipt image"}
           </Button>
         </div>
       </div>
-      {error ? (
-        <p className="text-sm text-red-600">{error}</p>
-      ) : null}
+      {error ? <p className="text-sm text-red-600">{error}</p> : null}
       {result ? (
-        <pre className="mt-4 whitespace-pre-wrap break-words rounded-md border p-4 text-sm leading-6">
+        <pre className="mt-4 rounded-md border p-4 text-sm leading-6 break-words whitespace-pre-wrap">
           {JSON.stringify(result, null, 2)}
         </pre>
       ) : null}

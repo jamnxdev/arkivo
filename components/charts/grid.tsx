@@ -2,6 +2,7 @@
 
 import { GridColumns, GridRows } from "@visx/grid";
 import { useId } from "react";
+
 import { chartCssVars, useChart } from "./chart-context";
 
 export interface GridProps {

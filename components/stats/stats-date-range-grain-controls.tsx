@@ -5,7 +5,6 @@ import {
   DATE_RANGE_OPTIONS,
   TIME_GRAIN_OPTIONS,
 } from "@/components/stats/stats-series";
-import type { DateRangePreset, TimeGrain } from "@/types/stats-types";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -14,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { DateRangePreset, TimeGrain } from "@/types/stats-types";
 
 type StatsDateRangeGrainControlsProps = {
   /** Shorter label row on narrow layouts (e.g. “Window”). */

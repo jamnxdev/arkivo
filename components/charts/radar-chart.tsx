@@ -4,7 +4,9 @@ import { Group } from "@visx/group";
 import { ParentSize } from "@visx/responsive";
 import { scaleLinear } from "@visx/scale";
 import { type ReactNode, useCallback, useState } from "react";
+
 import { cn } from "@/lib/utils";
+
 import {
   defaultRadarColors,
   type RadarContextValue,
@@ -76,7 +78,7 @@ function RadarChartInner({
         setInternalHoveredIndex(index);
       }
     },
-    [isControlled, onHoverChange]
+    [isControlled, onHoverChange],
   );
 
   // Use the smaller dimension
@@ -92,7 +94,7 @@ function RadarChartInner({
       });
       return scale(value) ?? 0;
     },
-    [radius]
+    [radius],
   );
 
   // Get angle for a metric index (rotated so first metric is at top)
@@ -102,7 +104,7 @@ function RadarChartInner({
       const angleOffset = -Math.PI / 2; // Rotate so first axis is at top
       return metricIndex * step + angleOffset;
     },
-    [metrics.length]
+    [metrics.length],
   );
 
   // Get x,y position for a metric at a given value
@@ -115,7 +117,7 @@ function RadarChartInner({
         y: r * Math.sin(angle),
       };
     },
-    [getAngle, yScale]
+    [getAngle, yScale],
   );
 
   // Get color for a data index
@@ -127,7 +129,7 @@ function RadarChartInner({
       }
       return defaultRadarColors[index % defaultRadarColors.length] as string;
     },
-    [data]
+    [data],
   );
 
   // Early return if dimensions not ready

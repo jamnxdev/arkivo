@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+
 import { cn } from "@/lib/utils";
 
 // ─── Public types ───────────────────────────────────────────────────
@@ -124,7 +125,7 @@ function hSegmentPath(
   segW: number,
   H: number,
   layerScale: number,
-  straight = false
+  straight = false,
 ) {
   const my = H / 2;
   const h0 = normStart * H * 0.44 * layerScale;
@@ -146,7 +147,7 @@ function vSegmentPath(
   segH: number,
   W: number,
   layerScale: number,
-  straight = false
+  straight = false,
 ) {
   const mx = W / 2;
   const w0 = normStart * W * 0.44 * layerScale;
@@ -251,7 +252,7 @@ function HSegment({
       () => {
         growProgress.set(1);
       },
-      index * staggerDelay * 1000
+      index * staggerDelay * 1000,
     );
     return () => clearTimeout(timeout);
   }, [growProgress, index, staggerDelay]);
@@ -424,7 +425,7 @@ function VSegment({
       () => {
         growProgress.set(1);
       },
-      index * staggerDelay * 1000
+      index * staggerDelay * 1000,
     );
     return () => clearTimeout(timeout);
   }, [growProgress, index, staggerDelay]);
@@ -544,17 +545,17 @@ function SegmentLabel({
   const display = stage.displayValue ?? formatValue(stage.value);
 
   const valueEl = showValues && (
-    <span className="whitespace-nowrap font-semibold text-foreground text-sm">
+    <span className="text-sm font-semibold whitespace-nowrap text-foreground">
       {display}
     </span>
   );
   const pctEl = showPercentage && (
-    <span className="rounded-full bg-foreground px-3 py-1 font-bold text-background text-xs shadow-sm">
+    <span className="rounded-full bg-foreground px-3 py-1 text-xs font-bold text-background shadow-sm">
       {formatPercentage(pct)}
     </span>
   );
   const labelEl = showLabels && (
-    <span className="whitespace-nowrap font-medium text-muted-foreground text-xs">
+    <span className="text-xs font-medium whitespace-nowrap text-muted-foreground">
       {stage.label}
     </span>
   );
@@ -566,7 +567,7 @@ function SegmentLabel({
         animate={{ opacity: 1 }}
         className={cn(
           "absolute inset-0 flex",
-          isHorizontal ? "flex-col items-center" : "flex-row items-center"
+          isHorizontal ? "flex-col items-center" : "flex-row items-center",
         )}
         initial={{ opacity: 0 }}
         transition={{
@@ -632,7 +633,7 @@ function SegmentLabel({
         // For vertical funnel, align controls horizontal placement
         isHorizontal
           ? cn("flex-col items-center", justifyMap[align])
-          : cn("flex-row items-center", justifyMap[align])
+          : cn("flex-row items-center", justifyMap[align]),
       )}
       initial={{ opacity: 0 }}
       style={{
@@ -649,7 +650,7 @@ function SegmentLabel({
           "flex gap-1.5",
           isVerticalStack
             ? cn("flex-col", itemsMap[isHorizontal ? "center" : align])
-            : cn("flex-row", itemsMap.center)
+            : cn("flex-row", itemsMap.center),
         )}
       >
         {valueEl}
@@ -701,7 +702,7 @@ export function FunnelChart({
         setInternalHoveredIndex(index);
       }
     },
-    [isControlled, onHoverChange]
+    [isControlled, onHoverChange],
   );
 
   const measure = useCallback(() => {
@@ -753,7 +754,7 @@ export function FunnelChart({
 
   return (
     <div
-      className={cn("relative w-full select-none overflow-visible", className)}
+      className={cn("relative w-full overflow-visible select-none", className)}
       ref={ref}
       style={{
         aspectRatio: horiz ? "2.2 / 1" : "1 / 1.8",
@@ -809,7 +810,7 @@ export function FunnelChart({
           <div
             className={cn(
               "absolute inset-0 flex overflow-visible",
-              horiz ? "flex-row" : "flex-col"
+              horiz ? "flex-row" : "flex-col",
             )}
             style={{ gap }}
           >

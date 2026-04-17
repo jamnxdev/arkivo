@@ -1,4 +1,5 @@
 /** Presentational blocks and helpers for dashboard (and future desktop) analytics. */
+export type * from "../../types/stats-types";
 export { AreaSpendingTrendSection } from "./area-spending-trend-section";
 export { DenseSpendingTrendSection } from "./dense-spending-trend-section";
 export { StatsFilterBar } from "./filter-bar";
@@ -30,4 +31,3 @@ export {
   summarizeTrendChartSeries,
   TIME_GRAIN_OPTIONS,
 } from "./stats-series";
-export type * from "../../types/stats-types";

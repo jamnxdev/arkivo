@@ -2,7 +2,9 @@
 
 import { motion } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
+
 import { cn } from "@/lib/utils";
+
 import { useChart } from "./chart-context";
 
 export interface BarYAxisProps {
@@ -40,7 +42,7 @@ function BarYAxisLabel({
             ? "var(--foreground)"
             : "var(--chart-label, var(--color-zinc-500))",
         }}
-        className={cn("truncate whitespace-nowrap text-right text-xs")}
+        className={cn("truncate text-right text-xs whitespace-nowrap")}
         initial={{
           opacity: 0.7,
           color: "var(--chart-label, var(--color-zinc-500))",
@@ -138,7 +140,7 @@ export function BarYAxis({
         />
       ))}
     </div>,
-    container
+    container,
   );
 }
 

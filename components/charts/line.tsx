@@ -9,6 +9,7 @@ type CurveFactory = any;
 
 import { motion, useMotionTemplate, useSpring } from "motion/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+
 import { chartCssVars, useChart } from "./chart-context";
 
 export interface LineProps {
@@ -57,7 +58,7 @@ export function Line({
   // Unique gradient ID for this line
   const gradientId = useMemo(
     () => `line-gradient-${dataKey}-${Math.random().toString(36).slice(2, 9)}`,
-    [dataKey]
+    [dataKey],
   );
 
   // Measure path length and trigger animation
@@ -97,7 +98,7 @@ export function Line({
       }
       return (low + high) / 2;
     },
-    [pathLength]
+    [pathLength],
   );
 
   // Calculate segment bounds for highlight from either selection or hover
@@ -177,7 +178,7 @@ export function Line({
       const value = d[dataKey];
       return typeof value === "number" ? (yScale(value) ?? 0) : 0;
     },
-    [dataKey, yScale]
+    [dataKey, yScale],
   );
 
   const isHovering = tooltipData !== null || selection?.active === true;

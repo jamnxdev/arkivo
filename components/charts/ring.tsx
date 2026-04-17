@@ -3,6 +3,7 @@
 import { Arc, arc as arcGenerator } from "@visx/shape";
 import { motion, useSpring, useTransform } from "motion/react";
 import { useEffect, useRef } from "react";
+
 import { ringCssVars, useRing } from "./ring-context";
 
 // Helper to generate arc path using d3 arc generator
@@ -11,7 +12,7 @@ function generateArcPath(
   outerRadius: number,
   startAngle: number,
   endAngle: number,
-  cornerRadius: number
+  cornerRadius: number,
 ): string {
   const generator = arcGenerator<unknown>({
     innerRadius,
@@ -101,7 +102,7 @@ function AnimatedProgressArc({
       outerRadius,
       startAngle,
       currentEndAngle,
-      cornerRadius
+      cornerRadius,
     );
   });
 
@@ -168,7 +169,7 @@ export function Ring({
         () => {
           hasAnimated.current = true;
         },
-        (ringExpandDelay + 0.3) * 1000
+        (ringExpandDelay + 0.3) * 1000,
       );
       return () => clearTimeout(timeout);
     }
@@ -269,7 +270,7 @@ export function Ring({
             outerRadius,
             ctxStartAngle,
             ctxStartAngle + arcRange * progress,
-            lineCap === "round" ? (outerRadius - innerRadius) / 2 : 0
+            lineCap === "round" ? (outerRadius - innerRadius) / 2 : 0,
           )}
           fill={color}
           style={{

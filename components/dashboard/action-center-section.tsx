@@ -26,7 +26,7 @@ const RECENT_RECEIPTS = [
 export function ActionCenterSection() {
   const totalRecentSpend = RECENT_RECEIPTS.reduce(
     (sum, receipt) => sum + receipt.amount,
-    0
+    0,
   );
 
   return (
@@ -64,8 +64,12 @@ export function ActionCenterSection() {
         ))}
 
         <div className="flex items-center justify-between rounded-lg border border-dashed border-border/70 bg-background/60 p-3">
-          <p className="text-xs text-muted-foreground">Total from latest receipts</p>
-          <p className="text-sm font-semibold">${totalRecentSpend.toFixed(2)}</p>
+          <p className="text-xs text-muted-foreground">
+            Total from latest receipts
+          </p>
+          <p className="text-sm font-semibold">
+            ${totalRecentSpend.toFixed(2)}
+          </p>
         </div>
       </div>
     </section>

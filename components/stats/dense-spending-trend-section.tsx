@@ -24,13 +24,13 @@ import {
   sliceDailyByRange,
   summarizeDailySlice,
 } from "@/components/stats/stats-series";
+import { Button } from "@/components/ui/button";
 import type {
   DateRangePreset,
   TimeGrain,
   TrendBarMode,
   TrendOrder,
 } from "@/types/stats-types";
-import { Button } from "@/components/ui/button";
 
 export function DenseSpendingTrendSection() {
   const [range, setRange] = useState<DateRangePreset>("30d");

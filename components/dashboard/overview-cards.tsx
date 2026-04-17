@@ -34,7 +34,9 @@ export function OverviewCards() {
             <p className="mt-2 text-xl font-semibold tracking-tight">
               {metric.value}
             </p>
-            <p className="mt-1 text-xs text-muted-foreground">{metric.helper}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {metric.helper}
+            </p>
           </article>
         ))}
       </div>

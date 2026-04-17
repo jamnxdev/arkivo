@@ -65,7 +65,7 @@ export interface RadarContextValue {
   getAngle: (metricIndex: number) => number;
   getPointPosition: (
     metricIndex: number,
-    value: number
+    value: number,
   ) => { x: number; y: number };
   yScale: (value: number) => number;
 }
@@ -89,7 +89,7 @@ export function useRadar(): RadarContextValue {
   if (!context) {
     throw new Error(
       "useRadar must be used within a RadarProvider. " +
-        "Make sure your component is wrapped in <RadarChart>."
+        "Make sure your component is wrapped in <RadarChart>.",
     );
   }
   return context;

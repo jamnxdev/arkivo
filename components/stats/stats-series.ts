@@ -1,4 +1,7 @@
-import { formatMonthYear, formatShortDate } from "@/components/stats/stats-format";
+import {
+  formatMonthYear,
+  formatShortDate,
+} from "@/components/stats/stats-format";
 import type { SpendingPoint } from "@/components/stats/stats-mock-data";
 import type {
   DateRangePreset,
@@ -38,7 +41,7 @@ function formatIsoDay(d: Date): string {
  */
 export function getDateRangeBounds(
   preset: DateRangePreset,
-  todayIso: string
+  todayIso: string,
 ): { start: string; end: string } {
   const today = new Date(`${todayIso}T12:00:00`);
   const end = formatIsoDay(today);
@@ -82,7 +85,7 @@ export function getDateRangeBounds(
 export function sliceDailyByRange(
   daily: SpendingPoint[],
   preset: DateRangePreset,
-  todayIso: string
+  todayIso: string,
 ): SpendingPoint[] {
   const { start, end } = getDateRangeBounds(preset, todayIso);
   return daily.filter((row) => row.date >= start && row.date <= end);
@@ -102,7 +105,7 @@ function monthKey(isoDay: string): string {
 
 export function aggregateSpendingSeries(
   rows: SpendingPoint[],
-  grain: TimeGrain
+  grain: TimeGrain,
 ): ChartSpendingPoint[] {
   if (grain === "day") {
     return rows.map((row) => ({
@@ -193,20 +196,20 @@ export function buildOrderedTrendChart(
   preset: DateRangePreset,
   grain: TimeGrain,
   order: TrendOrder,
-  todayIso: string
+  todayIso: string,
 ): ChartSpendingPoint[] {
   const sliced = sliceDailyByRange(daily, preset, todayIso);
   const agg = aggregateSpendingSeries(sliced, grain);
   return [...agg].sort((a, b) =>
     order === "asc"
       ? a.date.localeCompare(b.date)
-      : b.date.localeCompare(a.date)
+      : b.date.localeCompare(a.date),
   );
 }
 
 export function summarizeTrendChartSeries(
   points: ChartSpendingPoint[],
-  mode: TrendAreaMode
+  mode: TrendAreaMode,
 ): {
   key: "spending" | "receipts";
   total: number;
@@ -230,7 +233,7 @@ export function summarizeTrendChartSeries(
     };
   }
   const chronological = [...points].sort((a, b) =>
-    a.date.localeCompare(b.date)
+    a.date.localeCompare(b.date),
   );
   const values = chronological.map((row) => row[key]);
   const total = values.reduce((sum, v) => sum + v, 0);
@@ -240,7 +243,7 @@ export function summarizeTrendChartSeries(
   const delta = last - first;
   const peak = chronological.reduce(
     (best, item) => (item[key] > best[key] ? item : best),
-    chronological[0]
+    chronological[0],
   );
   return { key, total, average, delta, peak };
 }
@@ -263,7 +266,7 @@ export function summarizeDailySlice(daily: SpendingPoint[]): {
   const totalReceipts = daily.reduce((s, r) => s + r.receipts, 0);
   const peakDay = daily.reduce(
     (best, item) => (item.spending > best.spending ? item : best),
-    daily[0]
+    daily[0],
   );
   return {
     totalSpending,

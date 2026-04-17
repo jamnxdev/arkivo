@@ -2,6 +2,7 @@
 
 import { Camera, UploadSimple } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
+
 import { Button } from "@/components/ui/button";
 
 export function ReceiptCaptureSection() {
@@ -57,7 +58,9 @@ export function ReceiptCaptureSection() {
         />
 
         <p className="mt-3 text-xs text-muted-foreground">
-          {selectedFileName ? `Selected: ${selectedFileName}` : "No image selected"}
+          {selectedFileName
+            ? `Selected: ${selectedFileName}`
+            : "No image selected"}
         </p>
       </div>
     </section>

@@ -2,6 +2,7 @@
 
 import { motion, useSpring } from "motion/react";
 import { useEffect, useMemo, useState } from "react";
+
 import { chartCssVars, useChart } from "../chart-context";
 import { DateTicker } from "./date-ticker";
 import { TooltipBox } from "./tooltip-box";

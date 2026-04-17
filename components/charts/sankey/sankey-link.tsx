@@ -13,6 +13,7 @@ import {
   useRef,
   useState,
 } from "react";
+
 import {
   type SankeyLinkDatum,
   type SankeyNodeDatum,
@@ -30,7 +31,7 @@ function getNodeIndex(nodeOrIndex: NodeOrIndex): number | undefined {
 }
 
 function getNodeObject(
-  nodeOrIndex: NodeOrIndex
+  nodeOrIndex: NodeOrIndex,
 ): SankeyNodeType<SankeyNodeDatum, SankeyLinkDatum> | null {
   if (typeof nodeOrIndex === "number") {
     return null;
@@ -48,7 +49,7 @@ const defaultColors = [
 ];
 
 function getDefaultNodeColor(
-  node: SankeyNodeType<SankeyNodeDatum, SankeyLinkDatum>
+  node: SankeyNodeType<SankeyNodeDatum, SankeyLinkDatum>,
 ): string {
   const index = node.index ?? 0;
   return defaultColors[index % defaultColors.length] ?? "var(--chart-1)";
@@ -66,19 +67,19 @@ export interface SankeyLinkProps {
   /** Custom function to get node color (for gradient) */
   getNodeColor?: (
     node: SankeyNodeType<SankeyNodeDatum, SankeyLinkDatum>,
-    index: number
+    index: number,
   ) => string;
   /** Custom link color function (overrides gradient) */
   getLinkColor?: (
     link: SankeyLinkType<SankeyNodeDatum, SankeyLinkDatum>,
-    index: number
+    index: number,
   ) => string;
   /** Pattern definitions to render in defs. Use @visx/pattern components (PatternLines, PatternCircles, etc.) */
   patterns?: React.ReactNode;
   /** Return pattern ID for a link, or null/undefined to use gradient/solid color */
   getLinkPattern?: (
     link: SankeyLinkType<SankeyNodeDatum, SankeyLinkDatum>,
-    index: number
+    index: number,
   ) => string | null | undefined;
 }
 
@@ -222,7 +223,7 @@ export function SankeyLink({
       }
       return getDefaultNodeColor(node);
     },
-    [getNodeColor]
+    [getNodeColor],
   );
 
   // Get color for a link (solid color, when not using gradient)
@@ -233,7 +234,7 @@ export function SankeyLink({
       }
       return stroke || "var(--chart-line-primary)";
     },
-    [getLinkColor, stroke]
+    [getLinkColor, stroke],
   );
 
   // Check if any element is hovered

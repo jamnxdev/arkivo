@@ -3,6 +3,7 @@
 import { arc as arcGenerator } from "@visx/shape";
 import { motion, useSpring, useTransform } from "motion/react";
 import { useEffect, useRef } from "react";
+
 import { usePie } from "./pie-context";
 
 // Helper to generate arc path using d3 arc generator
@@ -12,7 +13,7 @@ function generateArcPath(
   startAngle: number,
   endAngle: number,
   cornerRadius: number,
-  padAngle: number
+  padAngle: number,
 ): string {
   const generator = arcGenerator<unknown>({
     innerRadius,
@@ -27,7 +28,7 @@ function generateArcPath(
 function getSliceOffset(
   startAngle: number,
   endAngle: number,
-  distance: number
+  distance: number,
 ): { x: number; y: number } {
   // Calculate the midpoint angle of the slice
   const midAngle = (startAngle + endAngle) / 2;
@@ -126,7 +127,7 @@ function AnimatedSliceTranslate({
       startAngle,
       currentEndAngle,
       cornerRadius,
-      padAngle
+      padAngle,
     );
   });
 
@@ -229,9 +230,9 @@ function AnimatedSliceGrow({
         startAngle,
         currentEndAngle,
         cornerRadius,
-        padAngle
+        padAngle,
       );
-    }
+    },
   );
 
   const glowColor = color;
@@ -291,7 +292,7 @@ export function PieSlice({
         () => {
           hasAnimated.current = true;
         },
-        (sliceExpandDelay + 0.5) * 1000
+        (sliceExpandDelay + 0.5) * 1000,
       );
       return () => clearTimeout(timeout);
     }
@@ -312,7 +313,7 @@ export function PieSlice({
   const offset = getSliceOffset(
     arcData.startAngle,
     arcData.endAngle,
-    hoverOffset
+    hoverOffset,
   );
 
   // Generate the static hitbox path (always uses base outer radius)
@@ -322,7 +323,7 @@ export function PieSlice({
     arcData.startAngle,
     arcData.endAngle,
     cornerRadius,
-    arcData.padAngle
+    arcData.padAngle,
   );
 
   // Generate the visible path for grow effect
@@ -333,7 +334,7 @@ export function PieSlice({
     arcData.startAngle,
     arcData.endAngle,
     cornerRadius,
-    arcData.padAngle
+    arcData.padAngle,
   );
 
   // Render animated slice based on effect type

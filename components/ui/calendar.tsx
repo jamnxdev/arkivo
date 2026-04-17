@@ -46,7 +46,11 @@ function getMonthDays(monthDate: Date) {
   while (days.length % 7 !== 0) {
     const lastDate = days[days.length - 1];
     days.push(
-      new Date(lastDate.getFullYear(), lastDate.getMonth(), lastDate.getDate() + 1),
+      new Date(
+        lastDate.getFullYear(),
+        lastDate.getMonth(),
+        lastDate.getDate() + 1,
+      ),
     );
   }
 
@@ -60,10 +64,15 @@ export function Calendar({
   className,
 }: CalendarProps) {
   const [currentMonth, setCurrentMonth] = React.useState(
-    selected ? new Date(selected.getFullYear(), selected.getMonth(), 1) : new Date(),
+    selected
+      ? new Date(selected.getFullYear(), selected.getMonth(), 1)
+      : new Date(),
   );
 
-  const monthDays = React.useMemo(() => getMonthDays(currentMonth), [currentMonth]);
+  const monthDays = React.useMemo(
+    () => getMonthDays(currentMonth),
+    [currentMonth],
+  );
   const monthLabel = new Intl.DateTimeFormat("en-GB", {
     month: "long",
     year: "numeric",
@@ -134,7 +143,9 @@ export function Calendar({
                 isOutsideMonth
                   ? "text-muted-foreground/60"
                   : "text-foreground hover:bg-accent hover:text-accent-foreground",
-                isToday && !isSelected ? "border border-border" : "border border-transparent",
+                isToday && !isSelected
+                  ? "border border-border"
+                  : "border border-transparent",
                 isSelected
                   ? "bg-primary text-primary-foreground hover:bg-primary/90 hover:text-primary-foreground"
                   : null,

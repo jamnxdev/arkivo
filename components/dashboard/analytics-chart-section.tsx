@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { Grid } from "@/components/charts/grid";
 import { Line } from "@/components/charts/line";
 import { LineChart } from "@/components/charts/line-chart";
 import { ChartTooltip } from "@/components/charts/tooltip/chart-tooltip";
 import { XAxis } from "@/components/charts/x-axis";
+import { Button } from "@/components/ui/button";
 
 const SPENDING_TREND: Record<string, unknown>[] = [
   { date: "2026-04-10", spending: 420 },
