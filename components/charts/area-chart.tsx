@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 
+import { formatDateByPreference } from "@/lib/settings/preferences";
 import { cn } from "@/lib/utils";
 
 import { Area, type AreaProps } from "./area";
@@ -191,10 +192,10 @@ function ChartInner({
   const dateLabels = useMemo(
     () =>
       data.map((d) =>
-        xAccessor(d).toLocaleDateString("en-US", {
+        formatDateByPreference(xAccessor(d), {
           month: "short",
           day: "numeric",
-        }),
+        }, { useDatePreset: false }),
       ),
     [data, xAccessor],
   );

@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import { createPortal } from "react-dom";
 
+import { formatDateByPreference } from "@/lib/settings/preferences";
 import { cn } from "@/lib/utils";
 
 import { useChart } from "./chart-context";
@@ -108,10 +109,10 @@ export function XAxis({ numTicks = 5, tickerHalfWidth = 50 }: XAxisProps) {
     return dates.map((date) => ({
       date,
       x: (xScale(date) ?? 0) + margin.left,
-      label: date.toLocaleDateString("en-US", {
+      label: formatDateByPreference(date, {
         month: "short",
         day: "numeric",
-      }),
+      }, { useDatePreset: false }),
     }));
   }, [xScale, margin.left, numTicks]);
 

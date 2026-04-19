@@ -4,7 +4,6 @@ import {
   CalendarBlankIcon,
   CaretLeftIcon,
   CaretRightIcon,
-  CurrencyEurIcon,
   FunnelSimpleIcon,
   MagnifyingGlassIcon,
   StorefrontIcon,
@@ -15,6 +14,11 @@ import { useMemo, useState } from "react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
+import {
+  formatCurrencyByPreference,
+  formatDateByPreference,
+  getCurrencySymbolByPreference,
+} from "@/lib/settings/preferences";
 import {
   Select,
   SelectContent,
@@ -47,21 +51,18 @@ function formatDate(value: string | null) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "Invalid date";
 
-  return new Intl.DateTimeFormat("en-GB", {
+  return formatDateByPreference(date, {
     day: "2-digit",
     month: "short",
     year: "numeric",
-  }).format(date);
+  });
 }
 
 function formatAmount(value: string | number | null) {
   const numericValue = typeof value === "string" ? Number(value) : value;
   if (numericValue == null || Number.isNaN(numericValue)) return "N/A";
 
-  return new Intl.NumberFormat("en-GB", {
-    style: "currency",
-    currency: "EUR",
-  }).format(numericValue);
+  return formatCurrencyByPreference(numericValue);
 }
 
 export function ReceiptsPageContent() {
@@ -70,6 +71,7 @@ export function ReceiptsPageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [categoryFilter, setCategoryFilter] = useState("all-categories");
   const [sortBy, setSortBy] = useState("newest-first");
+  const currencySymbol = getCurrencySymbolByPreference();
 
   const receipts = useMemo(
     () =>
@@ -241,7 +243,9 @@ export function ReceiptsPageContent() {
                   </p>
 
                   <p className="flex items-center gap-2 text-sm font-medium">
-                    <CurrencyEurIcon size={16} className="shrink-0" />
+                    <span className="w-4 shrink-0 text-center text-muted-foreground">
+                      {currencySymbol}
+                    </span>
                     {formatAmount(receipt.total)}
                   </p>
 

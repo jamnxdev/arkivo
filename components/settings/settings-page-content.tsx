@@ -25,7 +25,7 @@ export function SettingsPageContent() {
   const [dateLocale, setDateLocale] = React.useState("en-US");
   const [dateFormat, setDateFormat] = React.useState("dd/mm/yyyy");
   const [defaultTaxRate, setDefaultTaxRate] = React.useState("0");
-  const [savedAt, setSavedAt] = React.useState<string | null>(null);
+  const [preferencesHydrated, setPreferencesHydrated] = React.useState(false);
 
   React.useEffect(() => {
     setThemeMounted(true);
@@ -56,6 +56,7 @@ export function SettingsPageContent() {
     if (storedTaxRate) {
       setDefaultTaxRate(storedTaxRate);
     }
+    setPreferencesHydrated(true);
   }, []);
 
   const displayName =
@@ -67,8 +68,9 @@ export function SettingsPageContent() {
   const email = user?.primaryEmailAddress?.emailAddress ?? null;
 
   const themeValue = themeMounted ? (theme ?? "system") : "system";
-  const savePreferences = React.useCallback(() => {
-    if (typeof window === "undefined") {
+
+  React.useEffect(() => {
+    if (!preferencesHydrated || typeof window === "undefined") {
       return;
     }
 
@@ -77,8 +79,13 @@ export function SettingsPageContent() {
     window.localStorage.setItem("settings.dateLocale", dateLocale);
     window.localStorage.setItem("settings.dateFormat", dateFormat);
     window.localStorage.setItem("settings.defaultTaxRate", defaultTaxRate);
-    setSavedAt(new Date().toLocaleTimeString());
-  }, [dateFormat, dateLocale, defaultCurrency, defaultTaxRate]);
+  }, [
+    dateFormat,
+    dateLocale,
+    defaultCurrency,
+    defaultTaxRate,
+    preferencesHydrated,
+  ]);
 
   return (
     <section className="space-y-6">

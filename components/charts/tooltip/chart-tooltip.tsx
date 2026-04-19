@@ -4,6 +4,7 @@ import { motion, useSpring } from "motion/react";
 import { useMemo } from "react";
 import { createPortal } from "react-dom";
 
+import { formatDateByPreference } from "@/lib/settings/preferences";
 import { chartCssVars, useChart } from "../chart-context";
 import { useChartPortalRoot } from "../use-chart-portal-root";
 import { useIsClient } from "../use-is-client";
@@ -132,11 +133,11 @@ export function ChartTooltip({
       return barXAccessor(tooltipData.point);
     }
     // For line/area charts, use the date
-    return xAccessor(tooltipData.point).toLocaleDateString("en-US", {
+    return formatDateByPreference(xAccessor(tooltipData.point), {
       weekday: "short",
       month: "short",
       day: "numeric",
-    });
+    }, { useDatePreset: false });
   }, [tooltipData, barXAccessor, xAccessor]);
 
   if (!(isClient && portalRoot)) {

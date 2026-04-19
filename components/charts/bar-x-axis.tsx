@@ -108,20 +108,31 @@ export function BarXAxis({
       return { label, x };
     });
 
+    const plotWidth = Math.max(1, width - margin.left - margin.right);
+    const autoMaxLabels = Math.max(2, Math.floor(plotWidth / 72));
+    const resolvedMaxLabels = Math.min(maxLabels, autoMaxLabels);
+
     // If showAllLabels is true or we have fewer than maxLabels, show all
-    if (showAllLabels || allLabels.length <= maxLabels) {
+    if (showAllLabels || allLabels.length <= resolvedMaxLabels) {
       return allLabels;
     }
 
-    // Otherwise, skip some labels to avoid crowding
-    const step = Math.ceil(allLabels.length / maxLabels);
-    return allLabels.filter((_, i) => i % step === 0);
+    // Otherwise, skip some labels to avoid crowding while keeping first and last.
+    const step = Math.ceil((allLabels.length - 1) / (resolvedMaxLabels - 1));
+    const sampled = allLabels.filter((_, i) => i % step === 0);
+    const last = allLabels[allLabels.length - 1];
+    if (last && sampled[sampled.length - 1]?.x !== last.x) {
+      sampled.push(last);
+    }
+    return sampled;
   }, [
     barScale,
     bandWidth,
     barXAccessor,
     data,
+    width,
     margin.left,
+    margin.right,
     showAllLabels,
     maxLabels,
   ]);

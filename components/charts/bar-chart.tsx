@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 
+import { formatDateByPreference } from "@/lib/settings/preferences";
 import { cn } from "@/lib/utils";
 
 import type { BarProps } from "./bar";
@@ -164,10 +165,10 @@ function ChartInner({
     (d: Record<string, unknown>): string => {
       const value = d[xDataKey];
       if (value instanceof Date) {
-        return value.toLocaleDateString("en-US", {
+        return formatDateByPreference(value, {
           month: "short",
           day: "numeric",
-        });
+        }, { useDatePreset: false });
       }
       return String(value ?? "");
     },
