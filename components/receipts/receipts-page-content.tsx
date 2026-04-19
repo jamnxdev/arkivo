@@ -9,7 +9,7 @@ import {
   StorefrontIcon,
 } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -37,13 +37,6 @@ type ReceiptListItem = {
 };
 
 const ITEMS_PER_PAGE = 10;
-const MOCK_TEMPLATE: ReceiptListItem = {
-  id: "mock-template",
-  merchant: "dm-drogerie markt",
-  total: 5.55,
-  date: "2026-03-23T10:20:00.000Z",
-  category: "personal care",
-};
 
 function formatDate(value: string | null) {
   if (!value) return "No date";
@@ -66,24 +59,90 @@ function formatAmount(value: string | number | null) {
 }
 
 export function ReceiptsPageContent() {
+  const [receipts, setReceipts] = useState<ReceiptListItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [categoryFilter, setCategoryFilter] = useState("all-categories");
   const [sortBy, setSortBy] = useState("newest-first");
-  const currencySymbol = getCurrencySymbolByPreference();
+  const currencySymbol = getCurrencySymbolByPreference() || "€";
 
-  const receipts = useMemo(
-    () =>
-      Array.from({ length: 100 }, (_, index) => ({
-        ...MOCK_TEMPLATE,
-        id: `mock-receipt-${index + 1}`,
-      })),
-    [],
-  );
+  useEffect(() => {
+    fetch("/api/receipts")
+      .then((res) => res.json())
+      .then((payload) => {
+        if (!payload.success) {
+          throw new Error(payload.error || "Failed to load receipts");
+        }
+
+        setReceipts(Array.isArray(payload.data) ? payload.data : []);
+        setError(null);
+      })
+      .catch((fetchError: unknown) => {
+        setError(
+          fetchError instanceof Error
+            ? fetchError.message
+            : "Failed to load receipts",
+        );
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const categoryOptions = useMemo(() => {
+    const categories = new Set<string>();
+    for (const receipt of receipts) {
+      if (receipt.category?.trim()) {
+        categories.add(receipt.category.trim());
+      }
+    }
+    return [...categories].sort((a, b) => a.localeCompare(b));
+  }, [receipts]);
+
+  const filteredReceipts = useMemo(() => {
+    const normalizedSearch = searchValue.trim().toLowerCase();
+    const normalizedDate = selectedDate.trim();
+
+    const filtered = receipts.filter((receipt) => {
+      const matchesSearch =
+        normalizedSearch.length === 0 ||
+        (receipt.merchant ?? "").toLowerCase().includes(normalizedSearch) ||
+        (receipt.category ?? "").toLowerCase().includes(normalizedSearch);
+
+      const matchesCategory =
+        categoryFilter === "all-categories" ||
+        (receipt.category ?? "").trim() === categoryFilter;
+
+      const matchesDate =
+        normalizedDate.length === 0 ||
+        (receipt.date ? receipt.date.slice(0, 10) === normalizedDate : false);
+
+      return matchesSearch && matchesCategory && matchesDate;
+    });
+
+    return filtered.sort((left, right) => {
+      const leftAmount = Number(left.total ?? 0) || 0;
+      const rightAmount = Number(right.total ?? 0) || 0;
+      const leftDate = left.date ? new Date(left.date).getTime() : 0;
+      const rightDate = right.date ? new Date(right.date).getTime() : 0;
+
+      if (sortBy === "oldest-first") {
+        return leftDate - rightDate;
+      }
+      if (sortBy === "highest-amount") {
+        return rightAmount - leftAmount;
+      }
+      if (sortBy === "lowest-amount") {
+        return leftAmount - rightAmount;
+      }
+
+      return rightDate - leftDate;
+    });
+  }, [categoryFilter, receipts, searchValue, selectedDate, sortBy]);
 
   const stats = useMemo(() => {
-    const totalSpend = receipts.reduce((sum, receipt) => {
+    const totalSpend = filteredReceipts.reduce((sum, receipt) => {
       const value =
         typeof receipt.total === "string"
           ? Number(receipt.total)
@@ -92,15 +151,25 @@ export function ReceiptsPageContent() {
     }, 0);
 
     return {
-      count: receipts.length,
+      count: filteredReceipts.length,
       totalSpend,
     };
-  }, [receipts]);
+  }, [filteredReceipts]);
 
-  const totalPages = Math.ceil(receipts.length / ITEMS_PER_PAGE);
+  const totalPages = Math.max(1, Math.ceil(filteredReceipts.length / ITEMS_PER_PAGE));
   const pageStart = (currentPage - 1) * ITEMS_PER_PAGE;
   const pageEnd = pageStart + ITEMS_PER_PAGE;
-  const paginatedReceipts = receipts.slice(pageStart, pageEnd);
+  const paginatedReceipts = filteredReceipts.slice(pageStart, pageEnd);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchValue, selectedDate, categoryFilter, sortBy]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   return (
     <section className="space-y-6">
@@ -112,8 +181,7 @@ export function ReceiptsPageContent() {
           Receipt records
         </h1>
         <p className="text-sm text-muted-foreground">
-          Preview of upcoming list experience with filters, sorting, and
-          pagination.
+          Browse your real receipts with filters, sorting, and pagination.
         </p>
       </header>
 
@@ -139,7 +207,7 @@ export function ReceiptsPageContent() {
       <div className="rounded-2xl border bg-card p-4">
         <div className="mb-3 flex items-center gap-2 text-sm font-medium">
           <FunnelSimpleIcon size={16} />
-          List controls (preview)
+          List controls
         </div>
         <div className="space-y-3">
           <label className="relative block">
@@ -165,9 +233,11 @@ export function ReceiptsPageContent() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all-categories">All categories</SelectItem>
-                <SelectItem value="personal-care">Personal care</SelectItem>
-                <SelectItem value="groceries">Groceries</SelectItem>
-                <SelectItem value="household">Household</SelectItem>
+                {categoryOptions.map((category) => (
+                  <SelectItem key={category} value={category}>
+                    {category}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select
@@ -188,6 +258,12 @@ export function ReceiptsPageContent() {
               variant="outline"
               size="sm"
               className="justify-self-start lg:justify-self-end"
+              onClick={() => {
+                setSearchValue("");
+                setSelectedDate("");
+                setCategoryFilter("all-categories");
+                setSortBy("newest-first");
+              }}
             >
               Reset
             </Button>
@@ -195,12 +271,23 @@ export function ReceiptsPageContent() {
         </div>
       </div>
 
-      {receipts.length === 0 ? (
+      {isLoading ? (
+        <div className="rounded-2xl border bg-card p-6 text-center text-sm text-muted-foreground">
+          Loading receipts...
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-6 text-center text-sm text-destructive">
+          {error}
+        </div>
+      ) : null}
+
+      {!isLoading && !error && filteredReceipts.length === 0 ? (
         <div className="rounded-2xl border bg-card p-6 text-center">
-          <p className="font-medium">No receipts yet</p>
+          <p className="font-medium">No receipts found</p>
           <p className="mt-1 text-sm text-muted-foreground">
-            Upload your first receipt from the dashboard to start tracking
-            spend.
+            Upload receipts from the dashboard or adjust filters to see results.
           </p>
           <Link
             href="/dashboard"
@@ -211,7 +298,7 @@ export function ReceiptsPageContent() {
         </div>
       ) : null}
 
-      {receipts.length > 0 ? (
+      {!isLoading && !error && filteredReceipts.length > 0 ? (
         <div className="overflow-hidden rounded-2xl border bg-card">
           <div className="hidden border-b px-4 py-3 text-xs font-semibold tracking-[0.12em] text-muted-foreground uppercase md:block">
             <div className="grid grid-cols-[minmax(220px,2fr)_minmax(140px,1fr)_minmax(110px,0.8fr)_minmax(140px,1fr)_120px] items-center gap-3">
@@ -255,7 +342,7 @@ export function ReceiptsPageContent() {
 
                   <div className="md:justify-self-end">
                     <Button variant="outline" size="sm" disabled>
-                      View/Edit soon
+                      Edit soon
                     </Button>
                   </div>
                 </div>
@@ -271,11 +358,11 @@ export function ReceiptsPageContent() {
               </span>
               -
               <span className="font-medium text-foreground">
-                {Math.min(pageEnd, receipts.length)}
+                {Math.min(pageEnd, filteredReceipts.length)}
               </span>{" "}
               of{" "}
               <span className="font-medium text-foreground">
-                {receipts.length}
+                {filteredReceipts.length}
               </span>{" "}
               receipts
             </p>

@@ -7,76 +7,132 @@ export const STATS_VIEW_KEYS: ViewKey[] = [
   "forecast",
 ];
 
-// TODO: Replace with analytics API (daily points + breakdowns).
-
 export type SpendingPoint = {
   date: string;
   spending: number;
   receipts: number;
 };
 
-/** Fixed “today” for deterministic mock slicing until real data exists. */
-export const STATS_REFERENCE_TODAY = "2026-04-17";
-
-export const BREAKDOWN_BY_VIEW: Record<
-  ViewKey,
-  Array<{ segment: string; amount: number; count: number }>
-> = {
-  overview: [
-    { segment: "Food", amount: 1280, count: 33 },
-    { segment: "Transport", amount: 640, count: 21 },
-    { segment: "Shopping", amount: 1140, count: 17 },
-    { segment: "Bills", amount: 860, count: 9 },
-    { segment: "Health", amount: 430, count: 7 },
-  ],
-  category: [
-    { segment: "Groceries", amount: 970, count: 26 },
-    { segment: "Dining", amount: 670, count: 19 },
-    { segment: "Entertainment", amount: 530, count: 11 },
-    { segment: "Subscriptions", amount: 310, count: 8 },
-    { segment: "Utilities", amount: 780, count: 9 },
-  ],
-  payment: [
-    { segment: "UPI", amount: 1320, count: 38 },
-    { segment: "Credit Card", amount: 1560, count: 19 },
-    { segment: "Debit Card", amount: 690, count: 13 },
-    { segment: "Cash", amount: 420, count: 10 },
-    { segment: "Wallet", amount: 360, count: 7 },
-  ],
-  forecast: [
-    { segment: "Essentials", amount: 1420, count: 35 },
-    { segment: "Lifestyle", amount: 980, count: 18 },
-    { segment: "Travel", amount: 760, count: 8 },
-    { segment: "Health", amount: 510, count: 7 },
-    { segment: "Education", amount: 390, count: 5 },
-  ],
+export type BreakdownRow = {
+  segment: string;
+  amount: number;
+  count: number;
 };
 
-const MS_DAY = 86_400_000;
+export type StatsAnalyticsData = {
+  dailySpending: SpendingPoint[];
+  todayIso: string;
+  breakdownByView: Record<ViewKey, BreakdownRow[]>;
+};
 
-function parseLocalNoon(isoDay: string): number {
-  return new Date(`${isoDay}T12:00:00`).getTime();
-}
+type ReceiptRecord = {
+  total?: number | string | null;
+  date?: string | Date | null;
+  createdAt?: string | Date | null;
+  category?: string | null;
+  metadata?: Record<string, unknown> | null;
+};
 
-function formatIsoDay(t: number): string {
-  return new Date(t).toISOString().slice(0, 10);
-}
-
-function buildMockDaily(): SpendingPoint[] {
-  const end = parseLocalNoon(STATS_REFERENCE_TODAY);
-  const out: SpendingPoint[] = [];
-  for (let i = 0; i < 220; i++) {
-    const t = end - i * MS_DAY;
-    const date = formatIsoDay(t);
-    out.push({
-      date,
-      spending: Math.round(
-        480 + Math.sin(i * 0.11) * 140 + (i % 11) * 18 + (i % 7) * 22,
-      ),
-      receipts: 10 + (i % 13) + Math.floor((i % 44) / 11),
-    });
+function toIsoDay(value: string | Date): string | null {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
   }
-  return out.sort((a, b) => a.date.localeCompare(b.date));
+  return date.toISOString().slice(0, 10);
 }
 
-export const MOCK_DAILY_SPENDING: SpendingPoint[] = buildMockDaily();
+function buildCategoryBreakdown(receipts: ReceiptRecord[]): BreakdownRow[] {
+  const map = new Map<string, BreakdownRow>();
+
+  for (const receipt of receipts) {
+    const segment = receipt.category?.trim() || "Uncategorized";
+    const amount = Number(receipt.total ?? 0) || 0;
+    const current = map.get(segment);
+
+    if (current) {
+      current.amount += amount;
+      current.count += 1;
+      continue;
+    }
+
+    map.set(segment, { segment, amount, count: 1 });
+  }
+
+  return [...map.values()].sort((a, b) => b.amount - a.amount);
+}
+
+function buildPaymentBreakdown(receipts: ReceiptRecord[]): BreakdownRow[] {
+  const map = new Map<string, BreakdownRow>();
+
+  for (const receipt of receipts) {
+    const metadata = receipt.metadata ?? {};
+    const paymentMethodRaw = metadata.payment_method ?? metadata.paymentMethod;
+    const segment =
+      typeof paymentMethodRaw === "string" && paymentMethodRaw.trim()
+        ? paymentMethodRaw
+        : "Unknown";
+    const amount = Number(receipt.total ?? 0) || 0;
+    const current = map.get(segment);
+
+    if (current) {
+      current.amount += amount;
+      current.count += 1;
+      continue;
+    }
+
+    map.set(segment, { segment, amount, count: 1 });
+  }
+
+  return [...map.values()].sort((a, b) => b.amount - a.amount);
+}
+
+export function buildStatsAnalyticsData(
+  receipts: ReceiptRecord[],
+): StatsAnalyticsData {
+  const dailyMap = new Map<string, SpendingPoint>();
+  let todayIso = new Date().toISOString().slice(0, 10);
+
+  for (const receipt of receipts) {
+    const day = receipt.date
+      ? toIsoDay(receipt.date)
+      : receipt.createdAt
+        ? toIsoDay(receipt.createdAt)
+        : null;
+    if (!day) {
+      continue;
+    }
+
+    if (day > todayIso) {
+      todayIso = day;
+    }
+
+    const current = dailyMap.get(day);
+    const amount = Number(receipt.total ?? 0) || 0;
+    if (current) {
+      current.spending += amount;
+      current.receipts += 1;
+    } else {
+      dailyMap.set(day, { date: day, spending: amount, receipts: 1 });
+    }
+  }
+
+  const dailySpending = [...dailyMap.values()].sort((a, b) =>
+    a.date.localeCompare(b.date),
+  );
+
+  const categoryBreakdown = buildCategoryBreakdown(receipts);
+  const paymentBreakdown = buildPaymentBreakdown(receipts);
+
+  // TODO: Replace fallback perspective mapping with dedicated dimensions once
+  // receipts persist richer analytics dimensions for overview/forecast.
+  return {
+    dailySpending,
+    todayIso,
+    breakdownByView: {
+      overview: categoryBreakdown,
+      category: categoryBreakdown,
+      payment: paymentBreakdown,
+      forecast: categoryBreakdown,
+    },
+  };
+}

@@ -14,10 +14,7 @@ import {
   formatCurrency,
   formatShortDate,
 } from "@/components/stats/stats-format";
-import {
-  MOCK_DAILY_SPENDING,
-  STATS_REFERENCE_TODAY,
-} from "@/components/stats/stats-mock-data";
+import { type SpendingPoint } from "@/components/stats/stats-mock-data";
 import { StatsSectionCard } from "@/components/stats/stats-section-card";
 import {
   buildOrderedTrendChart,
@@ -32,27 +29,35 @@ import type {
   TrendOrder,
 } from "@/types/stats-types";
 
-export function DenseSpendingTrendSection() {
+interface DenseSpendingTrendSectionProps {
+  dailySpending: SpendingPoint[];
+  todayIso: string;
+}
+
+export function DenseSpendingTrendSection({
+  dailySpending,
+  todayIso,
+}: DenseSpendingTrendSectionProps) {
   const [range, setRange] = useState<DateRangePreset>("30d");
   const [grain, setGrain] = useState<TimeGrain>("day");
   const [barMode, setBarMode] = useState<TrendBarMode>("both");
   const [order, setOrder] = useState<TrendOrder>("asc");
 
   const dailyInRange = useMemo(
-    () => sliceDailyByRange(MOCK_DAILY_SPENDING, range, STATS_REFERENCE_TODAY),
-    [range],
+    () => sliceDailyByRange(dailySpending, range, todayIso),
+    [dailySpending, range, todayIso],
   );
 
   const chartData = useMemo(
     () =>
       buildOrderedTrendChart(
-        MOCK_DAILY_SPENDING,
+        dailySpending,
         range,
         grain,
         order,
-        STATS_REFERENCE_TODAY,
+        todayIso,
       ),
-    [range, grain, order],
+    [dailySpending, grain, order, range, todayIso],
   );
 
   const summary = useMemo(

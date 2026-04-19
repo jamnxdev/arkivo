@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
+
 import { Grid } from "@/components/charts/grid";
 import { Line } from "@/components/charts/line";
 import { LineChart } from "@/components/charts/line-chart";
@@ -7,17 +9,42 @@ import { ChartTooltip } from "@/components/charts/tooltip/chart-tooltip";
 import { XAxis } from "@/components/charts/x-axis";
 import { Button } from "@/components/ui/button";
 
-const SPENDING_TREND: Record<string, unknown>[] = [
-  { date: "2026-04-10", spending: 420 },
-  { date: "2026-04-11", spending: 510 },
-  { date: "2026-04-12", spending: 468 },
-  { date: "2026-04-13", spending: 590 },
-  { date: "2026-04-14", spending: 545 },
-  { date: "2026-04-15", spending: 620 },
-  { date: "2026-04-16", spending: 575 },
-] as const;
+interface AnalyticsChartSectionProps {
+  refreshToken?: number;
+}
 
-export function AnalyticsChartSection() {
+interface TimeSeriesPoint {
+  date: string;
+  total: number;
+}
+
+export function AnalyticsChartSection({
+  refreshToken = 0,
+}: AnalyticsChartSectionProps) {
+  const [points, setPoints] = useState<TimeSeriesPoint[]>([]);
+
+  useEffect(() => {
+    fetch("/api/analytics/timeseries")
+      .then((res) => res.json())
+      .then((res) => setPoints(Array.isArray(res.data) ? res.data : []));
+  }, [refreshToken]);
+
+  const chartData = useMemo(
+    () =>
+      points
+        .map((point) => ({
+          date: new Date(point.date).toLocaleDateString("en-GB", {
+            day: "2-digit",
+            month: "short",
+          }),
+          spending: Number(point.total) || 0,
+          rawDate: new Date(point.date).getTime(),
+        }))
+        .filter((point) => !Number.isNaN(point.rawDate))
+        .sort((a, b) => a.rawDate - b.rawDate),
+    [points],
+  );
+
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
@@ -35,7 +62,7 @@ export function AnalyticsChartSection() {
       <div className="rounded-xl border bg-card p-4">
         <LineChart
           aspectRatio="16 / 9"
-          data={SPENDING_TREND}
+          data={chartData}
           margin={{ top: 20, right: 8, bottom: 36, left: 8 }}
         >
           <Grid horizontal numTicksRows={4} />

@@ -12,11 +12,9 @@ export {
   formatMonthYear,
   formatShortDate,
 } from "./stats-format";
-export type { SpendingPoint } from "./stats-mock-data";
+export type { BreakdownRow, SpendingPoint, StatsAnalyticsData } from "./stats-mock-data";
 export {
-  BREAKDOWN_BY_VIEW,
-  MOCK_DAILY_SPENDING,
-  STATS_REFERENCE_TODAY,
+  buildStatsAnalyticsData,
   STATS_VIEW_KEYS,
 } from "./stats-mock-data";
 export { StatsPageHeader } from "./stats-page-header";

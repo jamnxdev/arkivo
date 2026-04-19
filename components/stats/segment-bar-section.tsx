@@ -12,7 +12,7 @@ import { YAxis } from "@/components/charts/y-axis";
 import { StatsFilterBar } from "@/components/stats/filter-bar";
 import { formatCurrency } from "@/components/stats/stats-format";
 import {
-  BREAKDOWN_BY_VIEW,
+  type BreakdownRow,
   STATS_VIEW_KEYS,
 } from "@/components/stats/stats-mock-data";
 import { StatsSectionCard } from "@/components/stats/stats-section-card";
@@ -25,14 +25,18 @@ import type {
   ViewKey,
 } from "@/types/stats-types";
 
-export function SegmentBarSection() {
+interface SegmentBarSectionProps {
+  breakdownByView: Record<ViewKey, BreakdownRow[]>;
+}
+
+export function SegmentBarSection({ breakdownByView }: SegmentBarSectionProps) {
   const [view, setView] = useState<ViewKey>("overview");
   const [metric, setMetric] = useState<MetricMode>("amount");
   const [sort, setSort] = useState<SortMode>("value");
   const [topN, setTopN] = useState<TopNMode>("all");
   const [orientation, setOrientation] = useState<BarOrientation>("vertical");
 
-  const rows = BREAKDOWN_BY_VIEW[view];
+  const rows = breakdownByView[view] ?? [];
 
   const barData = useMemo(
     () =>
@@ -72,7 +76,7 @@ export function SegmentBarSection() {
 
   return (
     <StatsSectionCard
-      subtitle="Compare segment mix for each perspective (mock breakdown)."
+      subtitle="Compare segment mix for each perspective."
       title="Segment bar comparison"
     >
       <div className="space-y-2">

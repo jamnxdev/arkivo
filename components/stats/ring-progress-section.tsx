@@ -8,7 +8,7 @@ import { RingChart } from "@/components/charts/ring-chart";
 import { StatsFilterBar } from "@/components/stats/filter-bar";
 import { formatCurrency } from "@/components/stats/stats-format";
 import {
-  BREAKDOWN_BY_VIEW,
+  type BreakdownRow,
   STATS_VIEW_KEYS,
 } from "@/components/stats/stats-mock-data";
 import { StatsSectionCard } from "@/components/stats/stats-section-card";
@@ -20,13 +20,19 @@ import type {
   ViewKey,
 } from "@/types/stats-types";
 
-export function RingProgressSection() {
+interface RingProgressSectionProps {
+  breakdownByView: Record<ViewKey, BreakdownRow[]>;
+}
+
+export function RingProgressSection({
+  breakdownByView,
+}: RingProgressSectionProps) {
   const [view, setView] = useState<ViewKey>("payment");
   const [metric, setMetric] = useState<MetricMode>("amount");
   const [scale, setScale] = useState<RingScale>("relative");
   const [top, setTop] = useState<RingTopMode>("4");
 
-  const rows = BREAKDOWN_BY_VIEW[view];
+  const rows = breakdownByView[view] ?? [];
 
   const ringData = useMemo(
     () =>
@@ -49,7 +55,7 @@ export function RingProgressSection() {
 
   return (
     <StatsSectionCard
-      subtitle="Progress rings for the largest segments in the mock slice."
+      subtitle="Progress rings for the largest segments in the selected perspective."
       title="Ring progress"
     >
       <StatsFilterBar>

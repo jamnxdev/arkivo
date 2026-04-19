@@ -11,10 +11,7 @@ import { YAxis } from "@/components/charts/y-axis";
 import { StatsFilterBar } from "@/components/stats/filter-bar";
 import { StatsDateRangeGrainControls } from "@/components/stats/stats-date-range-grain-controls";
 import { formatCurrency } from "@/components/stats/stats-format";
-import {
-  MOCK_DAILY_SPENDING,
-  STATS_REFERENCE_TODAY,
-} from "@/components/stats/stats-mock-data";
+import type { SpendingPoint } from "@/components/stats/stats-mock-data";
 import { StatsSectionCard } from "@/components/stats/stats-section-card";
 import {
   buildOrderedTrendChart,
@@ -28,7 +25,15 @@ import type {
   TrendAreaMode,
 } from "@/types/stats-types";
 
-export function AreaSpendingTrendSection() {
+interface AreaSpendingTrendSectionProps {
+  dailySpending: SpendingPoint[];
+  todayIso: string;
+}
+
+export function AreaSpendingTrendSection({
+  dailySpending,
+  todayIso,
+}: AreaSpendingTrendSectionProps) {
   const [range, setRange] = useState<DateRangePreset>("90d");
   const [grain, setGrain] = useState<TimeGrain>("week");
   const [mode, setMode] = useState<TrendAreaMode>("spending");
@@ -36,13 +41,13 @@ export function AreaSpendingTrendSection() {
   const chartData = useMemo(
     () =>
       buildOrderedTrendChart(
-        MOCK_DAILY_SPENDING,
+        dailySpending,
         range,
         grain,
         "asc",
-        STATS_REFERENCE_TODAY,
+        todayIso,
       ),
-    [range, grain],
+    [dailySpending, grain, range, todayIso],
   );
 
   const areaSummary = useMemo(
@@ -52,7 +57,7 @@ export function AreaSpendingTrendSection() {
 
   return (
     <StatsSectionCard
-      subtitle="Smoothed trend for the same mock series with independent range and grouping."
+      subtitle="Smoothed trend for the selected range with independent grouping controls."
       title="Area trend"
     >
       <StatsDateRangeGrainControls
