@@ -1,5 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import { getCategoryBreakdown } from "@/lib/db/queries/analytics";
+import { setRlsUserContext } from "@/lib/db/rls";
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -11,6 +12,7 @@ export async function GET() {
     );
   }
 
+  await setRlsUserContext(user.id);
   const data = await getCategoryBreakdown(user.id);
 
   return Response.json({ success: true, data });

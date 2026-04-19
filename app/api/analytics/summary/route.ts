@@ -1,4 +1,5 @@
 import { getCurrentUser } from "@/lib/auth";
+import { setRlsUserContext } from "@/lib/db/rls";
 import { getSummary } from "@/lib/db/queries/analytics";
 
 export async function GET() {
@@ -11,6 +12,7 @@ export async function GET() {
     );
   }
 
+  await setRlsUserContext(user.id);
   const data = await getSummary(user.id);
 
   return Response.json({ success: true, data });

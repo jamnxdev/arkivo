@@ -1,4 +1,5 @@
 import { getCurrentUser } from "@/lib/auth";
+import { setRlsUserContext } from "@/lib/db/rls";
 import { deleteReceipt, updateReceipt } from "@/lib/db/queries/receipts";
 
 type RouteParams = {
@@ -14,6 +15,7 @@ export async function PATCH(req: Request, context: RouteParams) {
     return Response.json({ success: false, error: "Unauthorized" });
   }
 
+  await setRlsUserContext(user.id);
   const { id } = await context.params;
   const body = await req.json();
 
@@ -29,6 +31,7 @@ export async function DELETE(req: Request, context: RouteParams) {
     return Response.json({ success: false, error: "Unauthorized" });
   }
 
+  await setRlsUserContext(user.id);
   const { id } = await context.params;
 
   await deleteReceipt(id);
