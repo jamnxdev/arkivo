@@ -34,8 +34,8 @@ export const dashboardNavItems: DashboardNavItem[] = [
   },
   {
     label: "Settings",
-    href: "/settings",
+    href: "/dashboard/settings",
     icon: GearSixIcon,
-    enabled: false,
+    enabled: true,
   },
 ];
