@@ -4,19 +4,381 @@ import { Camera, UploadSimple } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-export function ReceiptCaptureSection() {
+interface ReceiptCaptureSectionProps {
+  onReceiptSaved?: () => void;
+}
+
+interface ParsedReceipt {
+  merchant: string | null;
+  merchant_brand: string | null;
+  total: number | null;
+  currency: string;
+  date: string | null;
+  time: string | null;
+  category: string | null;
+  items: Array<{
+    name: string;
+    price: number;
+    category?: string;
+  }> | null;
+  tax: Record<string, number> | null;
+  metadata?: Record<string, unknown>;
+  parser_config_id?: string;
+}
+
+interface ReceiptDraft {
+  merchant: string | null;
+  merchantBrand: string | null;
+  total: number | null;
+  currency: string;
+  date: string | null;
+  time: string | null;
+  category: string | null;
+  items: Array<{
+    name: string;
+    price: number;
+    category?: string;
+  }> | null;
+  tax: Record<string, number> | null;
+  metadata: Record<string, unknown> | null;
+  parserConfigId: string | null;
+}
+
+interface NotificationToast {
+  id: number;
+  title: string;
+  description: string;
+  tone: "error" | "success";
+}
+
+function roundToTwo(value: number) {
+  return Math.round(value * 100) / 100;
+}
+
+function toTwoDecimalString(value: number | null) {
+  if (value === null || Number.isNaN(value)) {
+    return "";
+  }
+
+  return roundToTwo(value).toFixed(2);
+}
+
+// TODO: Replace with user-configurable categories when taxonomy settings land.
+const CATEGORY_OPTIONS = [
+  "groceries",
+  "dining",
+  "transport",
+  "shopping",
+  "utilities",
+  "health",
+  "travel",
+  "misc",
+] as const;
+
+export function ReceiptCaptureSection({
+  onReceiptSaved,
+}: ReceiptCaptureSectionProps) {
   const uploadInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [notifications, setNotifications] = useState<NotificationToast[]>([]);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [pendingPublicId, setPendingPublicId] = useState<string | null>(null);
+  const [draft, setDraft] = useState<ReceiptDraft | null>(null);
+
+  const addNotification = (
+    title: string,
+    description: string,
+    tone: NotificationToast["tone"],
+  ) => {
+    const id = Date.now() + Math.floor(Math.random() * 1000);
+    setNotifications((prev) => [...prev, { id, title, description, tone }]);
+    setTimeout(() => {
+      setNotifications((prev) => prev.filter((item) => item.id !== id));
+    }, 5000);
+  };
+
+  const parseApiError = (
+    response: Response,
+    payload: unknown,
+    fallback: string,
+  ): string => {
+    const message =
+      typeof payload === "object" &&
+      payload !== null &&
+      "error" in payload &&
+      typeof payload.error === "string"
+        ? payload.error
+        : fallback;
+
+    if (response.status !== 429) {
+      return message;
+    }
+
+    const retryAfter = response.headers.get("Retry-After");
+    return retryAfter
+      ? `${message}. Rate limit reached. Retry in about ${retryAfter}s.`
+      : `${message}. Rate limit reached. Please wait and retry.`;
+  };
+
+  const cleanupUploadedAsset = async (publicId: string) => {
+    try {
+      await fetch("/api/uploads/cloudinary/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ publicId }),
+      });
+    } catch {}
+  };
+
+  const toDraft = (parsed: ParsedReceipt): ReceiptDraft => ({
+    merchant: parsed.merchant,
+    merchantBrand: parsed.merchant_brand,
+    total: parsed.total === null ? null : roundToTwo(parsed.total),
+    currency: parsed.currency || "EUR",
+    date: parsed.date,
+    time: parsed.time,
+    category: parsed.category,
+    items: parsed.items?.map((item) => ({
+      ...item,
+      price: roundToTwo(item.price),
+    })) ?? null,
+    tax: parsed.tax
+      ? Object.fromEntries(
+          Object.entries(parsed.tax).map(([key, value]) => [key, roundToTwo(value)]),
+        )
+      : null,
+    metadata: parsed.metadata ?? null,
+    parserConfigId: parsed.parser_config_id ?? null,
+  });
+
+  const getRoundedDraft = (input: ReceiptDraft): ReceiptDraft => ({
+    ...input,
+    total: input.total === null ? null : roundToTwo(input.total),
+    items:
+      input.items?.map((item) => ({
+        ...item,
+        price: roundToTwo(item.price),
+      })) ?? null,
+    tax: input.tax
+      ? Object.fromEntries(
+          Object.entries(input.tax).map(([key, value]) => [key, roundToTwo(value)]),
+        )
+      : null,
+  });
+
+  const resetReviewState = () => {
+    setReviewOpen(false);
+    setDraft(null);
+    setPendingPublicId(null);
+    setError(null);
+  };
+
+  const clearPendingAssetAndReview = async () => {
+    if (pendingPublicId) {
+      await cleanupUploadedAsset(pendingPublicId);
+    }
+    resetReviewState();
+  };
 
   const handleImageSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    setSelectedFileName(file?.name ?? null);
+    void (async () => {
+      const file = event.target.files?.[0];
+      let uploadedPublicId: string | null = null;
+
+      if (!file) {
+        return;
+      }
+
+      setSelectedFileName(file.name);
+      setError(null);
+      setIsUploading(true);
+
+      try {
+        if (pendingPublicId) {
+          await cleanupUploadedAsset(pendingPublicId);
+          setPendingPublicId(null);
+          setReviewOpen(false);
+        }
+
+        const signatureRes = await fetch("/api/uploads/cloudinary", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            filename: file.name,
+            contentType: file.type,
+            size: file.size,
+          }),
+        });
+
+        const signaturePayload = await signatureRes.json();
+
+        if (!signatureRes.ok || !signaturePayload.success) {
+          throw new Error(
+            parseApiError(
+              signatureRes,
+              signaturePayload,
+              "Failed to prepare receipt upload",
+            ),
+          );
+        }
+
+        const uploadFormData = new FormData();
+        uploadFormData.append("file", file);
+        uploadFormData.append("api_key", signaturePayload.data.apiKey);
+        uploadFormData.append("timestamp", String(signaturePayload.data.timestamp));
+        uploadFormData.append("signature", signaturePayload.data.signature);
+        uploadFormData.append("folder", signaturePayload.data.folder);
+        uploadFormData.append("public_id", signaturePayload.data.publicId);
+
+        const uploadRes = await fetch(signaturePayload.data.uploadUrl, {
+          method: "POST",
+          body: uploadFormData,
+        });
+
+        const uploadPayload = await uploadRes.json();
+
+        if (!uploadRes.ok || !uploadPayload.secure_url) {
+          throw new Error("Failed to upload receipt image");
+        }
+
+        uploadedPublicId =
+          uploadPayload.public_id ?? signaturePayload.data.publicId;
+
+        const ingestRes = await fetch("/api/ingest", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            imageUrl: uploadPayload.secure_url,
+            filename: file.name,
+            publicId: uploadedPublicId,
+          }),
+        });
+
+        const ingestPayload = await ingestRes.json();
+
+        if (!ingestRes.ok || !ingestPayload.success) {
+          throw new Error(
+            parseApiError(ingestRes, ingestPayload, "Failed to process receipt"),
+          );
+        }
+
+        setDraft(toDraft(ingestPayload.data.parsed as ParsedReceipt));
+        setPendingPublicId(
+          (ingestPayload.data.cloudinaryPublicId as string) ?? uploadedPublicId,
+        );
+        setReviewOpen(true);
+      } catch (uploadError) {
+        if (uploadedPublicId) {
+          await cleanupUploadedAsset(uploadedPublicId);
+        }
+
+        setError(
+          uploadError instanceof Error
+            ? uploadError.message
+            : "Failed to process receipt",
+        );
+        addNotification(
+          "Receipt processing failed",
+          uploadError instanceof Error
+            ? uploadError.message
+            : "Failed to process receipt",
+          "error",
+        );
+      } finally {
+        setIsUploading(false);
+        event.target.value = "";
+      }
+    })();
+  };
+
+  const handleSave = async () => {
+    if (!draft) {
+      return;
+    }
+
+    setIsSaving(true);
+    setError(null);
+
+    try {
+      const roundedDraft = getRoundedDraft(draft);
+      setDraft(roundedDraft);
+
+      const saveRes = await fetch("/api/receipts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...roundedDraft,
+          cloudinaryPublicId: pendingPublicId,
+        }),
+      });
+      const savePayload = await saveRes.json();
+
+      if (!saveRes.ok || !savePayload.success) {
+        throw new Error(parseApiError(saveRes, savePayload, "Failed to save receipt"));
+      }
+
+      resetReviewState();
+      onReceiptSaved?.();
+      addNotification("Receipt saved", "Your receipt has been stored.", "success");
+    } catch (saveError) {
+      setError(
+        saveError instanceof Error ? saveError.message : "Failed to save receipt",
+      );
+      addNotification(
+        "Save failed",
+        saveError instanceof Error ? saveError.message : "Failed to save receipt",
+        "error",
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
     <section className="space-y-3">
+      <div className="fixed top-4 right-4 z-60 flex w-[320px] flex-col gap-2">
+        {notifications.map((note) => (
+          <div
+            key={note.id}
+            className={
+              note.tone === "error"
+                ? "rounded-lg border border-destructive/40 bg-destructive/10 p-3"
+                : "rounded-lg border border-emerald-500/40 bg-emerald-500/10 p-3"
+            }
+          >
+            <p className="text-sm font-semibold">{note.title}</p>
+            <p className="text-xs text-muted-foreground">{note.description}</p>
+          </div>
+        ))}
+      </div>
+
       <div>
         <h2 className="text-lg font-semibold">Add receipt</h2>
         <p className="text-xs text-muted-foreground">
@@ -30,14 +392,19 @@ export function ReceiptCaptureSection() {
             onClick={() => uploadInputRef.current?.click()}
             size="sm"
             variant="outline"
+            disabled={isUploading || isSaving}
           >
             <UploadSimple />
-            Upload image
+            {isUploading ? "Processing..." : "Upload image"}
           </Button>
 
-          <Button onClick={() => cameraInputRef.current?.click()} size="sm">
+          <Button
+            onClick={() => cameraInputRef.current?.click()}
+            size="sm"
+            disabled={isUploading || isSaving}
+          >
             <Camera />
-            Take image
+            {isUploading ? "Processing..." : "Take image"}
           </Button>
         </div>
 
@@ -62,7 +429,349 @@ export function ReceiptCaptureSection() {
             ? `Selected: ${selectedFileName}`
             : "No image selected"}
         </p>
+        {error ? <p className="mt-2 text-xs text-destructive">{error}</p> : null}
       </div>
+
+      <Dialog
+        open={reviewOpen}
+        onOpenChange={(open) => {
+          if (open) setReviewOpen(true);
+        }}
+      >
+        <DialogContent
+          className="flex max-h-[90vh] flex-col overflow-hidden p-0 sm:max-w-2xl"
+          showCloseButton={false}
+        >
+          <DialogHeader className="px-6 pt-6">
+            <DialogTitle>Review receipt details</DialogTitle>
+            <DialogDescription>
+              Edit extracted values before saving this receipt.
+            </DialogDescription>
+          </DialogHeader>
+
+          {draft ? (
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <div className="space-y-4">
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Input
+                  value={draft.merchant ?? ""}
+                  onChange={(event) =>
+                    setDraft((prev) =>
+                      prev
+                        ? { ...prev, merchant: event.target.value || null }
+                        : prev,
+                    )
+                  }
+                  placeholder="Merchant"
+                />
+                <Input
+                  value={draft.merchantBrand ?? ""}
+                  onChange={(event) =>
+                    setDraft((prev) =>
+                      prev
+                        ? { ...prev, merchantBrand: event.target.value || null }
+                        : prev,
+                    )
+                  }
+                  placeholder="Brand"
+                />
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={toTwoDecimalString(draft.total)}
+                  onChange={(event) =>
+                    setDraft((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            total:
+                              event.target.value === ""
+                                ? null
+                                : Number(event.target.value),
+                          }
+                        : prev,
+                    )
+                  }
+                  onBlur={() =>
+                    setDraft((prev) =>
+                      prev
+                        ? {
+                            ...prev,
+                            total: prev.total === null ? null : roundToTwo(prev.total),
+                          }
+                        : prev,
+                    )
+                  }
+                  placeholder="Total"
+                />
+                <Input
+                  value={draft.currency}
+                  onChange={(event) =>
+                    setDraft((prev) =>
+                      prev ? { ...prev, currency: event.target.value || "EUR" } : prev,
+                    )
+                  }
+                  placeholder="Currency"
+                />
+                <Input
+                  type="date"
+                  value={draft.date ?? ""}
+                  onChange={(event) =>
+                    setDraft((prev) =>
+                      prev ? { ...prev, date: event.target.value || null } : prev,
+                    )
+                  }
+                />
+                <Input
+                  type="time"
+                  value={draft.time ?? ""}
+                  onChange={(event) =>
+                    setDraft((prev) =>
+                      prev ? { ...prev, time: event.target.value || null } : prev,
+                    )
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Category</p>
+                <Select
+                  value={draft.category ?? "misc"}
+                  onValueChange={(value) =>
+                    setDraft((prev) =>
+                      prev ? { ...prev, category: String(value) } : prev,
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORY_OPTIONS.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">Tax lines</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      setDraft((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              tax: {
+                                ...(prev.tax ?? {}),
+                                [`tax-${Object.keys(prev.tax ?? {}).length + 1}`]: 0,
+                              },
+                            }
+                          : prev,
+                      )
+                    }
+                  >
+                    Add tax
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {Object.entries(draft.tax ?? {}).map(([key, value]) => (
+                    <div key={key} className="grid gap-2 sm:grid-cols-3">
+                      <Input
+                        value={key}
+                        onChange={(event) =>
+                          setDraft((prev) => {
+                            if (!prev?.tax) return prev;
+
+                            const nextTax = { ...prev.tax };
+                            const amount = nextTax[key];
+                            delete nextTax[key];
+                            nextTax[event.target.value || key] = amount;
+
+                            return { ...prev, tax: nextTax };
+                          })
+                        }
+                        placeholder="Tax label"
+                      />
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={toTwoDecimalString(value)}
+                        onChange={(event) =>
+                          setDraft((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  tax: {
+                                    ...(prev.tax ?? {}),
+                                    [key]: Number(event.target.value) || 0,
+                                  },
+                                }
+                              : prev,
+                          )
+                        }
+                        onBlur={() =>
+                          setDraft((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  tax: {
+                                    ...(prev.tax ?? {}),
+                                    [key]: roundToTwo((prev.tax ?? {})[key] ?? 0),
+                                  },
+                                }
+                              : prev,
+                          )
+                        }
+                        placeholder="Amount"
+                      />
+                      <Button
+                        variant="destructive"
+                        onClick={() =>
+                          setDraft((prev) => {
+                            if (!prev?.tax) return prev;
+
+                            const nextTax = { ...prev.tax };
+                            delete nextTax[key];
+
+                            return { ...prev, tax: nextTax };
+                          })
+                        }
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium">Items</p>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      setDraft((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              items: [...(prev.items ?? []), { name: "", price: 0 }],
+                            }
+                          : prev,
+                      )
+                    }
+                  >
+                    Add item
+                  </Button>
+                </div>
+                <div className="space-y-2">
+                  {(draft.items ?? []).map((item, index) => (
+                    <div key={`${item.name}-${index}`} className="grid gap-2 sm:grid-cols-3">
+                      <Input
+                        value={item.name}
+                        placeholder="Item name"
+                        onChange={(event) =>
+                          setDraft((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  items: (prev.items ?? []).map((entry, entryIndex) =>
+                                    entryIndex === index
+                                      ? { ...entry, name: event.target.value }
+                                      : entry,
+                                  ),
+                                }
+                              : prev,
+                          )
+                        }
+                      />
+                      <Input
+                        type="number"
+                        step="0.01"
+                        value={toTwoDecimalString(item.price)}
+                        placeholder="Price"
+                        onChange={(event) =>
+                          setDraft((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  items: (prev.items ?? []).map((entry, entryIndex) =>
+                                    entryIndex === index
+                                      ? {
+                                          ...entry,
+                                          price: Number(event.target.value) || 0,
+                                        }
+                                      : entry,
+                                  ),
+                                }
+                              : prev,
+                          )
+                        }
+                        onBlur={() =>
+                          setDraft((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  items: (prev.items ?? []).map((entry, entryIndex) =>
+                                    entryIndex === index
+                                      ? {
+                                          ...entry,
+                                          price: roundToTwo(entry.price),
+                                        }
+                                      : entry,
+                                  ),
+                                }
+                              : prev,
+                          )
+                        }
+                      />
+                      <Button
+                        variant="destructive"
+                        onClick={() =>
+                          setDraft((prev) =>
+                            prev
+                              ? {
+                                  ...prev,
+                                  items: (prev.items ?? []).filter(
+                                    (_, entryIndex) => entryIndex !== index,
+                                  ),
+                                }
+                              : prev,
+                          )
+                        }
+                      >
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            </div>
+          ) : null}
+
+          <DialogFooter className="border-t bg-background px-6 py-4">
+            <Button
+              variant="outline"
+              disabled={isSaving}
+              onClick={() => {
+                void clearPendingAssetAndReview();
+              }}
+            >
+              Cancel
+            </Button>
+            <Button disabled={isSaving || !draft} onClick={handleSave}>
+              {isSaving ? "Saving..." : "Save receipt"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

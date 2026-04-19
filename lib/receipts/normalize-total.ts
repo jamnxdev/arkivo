@@ -4,6 +4,10 @@ interface NormalizeReceiptTotalInput {
   tax: Record<string, number> | null | undefined;
 }
 
+function roundToTwo(value: number) {
+  return Math.round(value * 100) / 100;
+}
+
 function isApproxEqual(left: number, right: number, tolerance = 0.01) {
   return Math.abs(left - right) <= tolerance;
 }
@@ -21,23 +25,23 @@ function getDerivedTotal(
     ? Object.values(tax).reduce((sum, amount) => sum + amount, 0)
     : 0;
 
-  return itemTotal + taxTotal;
+  return roundToTwo(itemTotal + taxTotal);
 }
 
 export function normalizeReceiptTotal(parsed: NormalizeReceiptTotalInput) {
   const derivedTotal = getDerivedTotal(parsed.items, parsed.tax);
 
   if (parsed.total === null) {
-    return derivedTotal;
+    return derivedTotal === null ? null : roundToTwo(derivedTotal);
   }
 
   if (derivedTotal === null) {
-    return parsed.total;
+    return roundToTwo(parsed.total);
   }
 
   if (isApproxEqual(parsed.total, derivedTotal)) {
-    return derivedTotal;
+    return roundToTwo(derivedTotal);
   }
 
-  return parsed.total;
+  return roundToTwo(parsed.total);
 }

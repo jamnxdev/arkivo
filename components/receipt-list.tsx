@@ -13,6 +13,20 @@ interface ReceiptListItem {
   date: string | null;
 }
 
+function formatAmount(value: string | number | null) {
+  if (value === null) {
+    return "-";
+  }
+
+  const numeric = Number(value);
+
+  if (Number.isNaN(numeric)) {
+    return "-";
+  }
+
+  return numeric.toFixed(2);
+}
+
 export function ReceiptList({ refreshToken = 0 }: ReceiptListProps) {
   const [data, setData] = useState<ReceiptListItem[]>([]);
 
@@ -27,7 +41,7 @@ export function ReceiptList({ refreshToken = 0 }: ReceiptListProps) {
       {data.map((r) => (
         <div key={r.id} className="rounded border p-3">
           <p>{r.merchant}</p>
-          <p>{r.total} €</p>
+          <p>{formatAmount(r.total)} €</p>
           <p>{r.date}</p>
         </div>
       ))}

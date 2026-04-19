@@ -29,3 +29,28 @@ export const receiptSchema = z
     parser_config_id: z.string().optional(),
   })
   .strict();
+
+export const reviewedReceiptSaveSchema = z
+  .object({
+    merchant: z.string().nullable(),
+    merchantBrand: z.string().nullable(),
+    total: z.number().nullable(),
+    currency: z.string().default("EUR"),
+    date: z.string().nullable(),
+    time: z.string().nullable(),
+    category: z.string().nullable(),
+    items: z
+      .array(
+        z.object({
+          name: z.string(),
+          price: z.number(),
+          category: z.string().optional(),
+        }),
+      )
+      .nullable(),
+    tax: z.record(z.number()).nullable(),
+    metadata: z.record(z.any()).nullable(),
+    parserConfigId: z.string().nullable(),
+    cloudinaryPublicId: z.string().nullable(),
+  })
+  .strict();

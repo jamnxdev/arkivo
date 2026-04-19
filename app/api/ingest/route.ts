@@ -1,8 +1,6 @@
 import { extractReceiptFromImage } from "@/lib/ai/client";
 import { getCurrentUser } from "@/lib/auth";
-import { createReceipt } from "@/lib/db/queries/receipts";
 import { normalizeReceiptTotal } from "@/lib/receipts/normalize-total";
-import { deleteCloudinaryAsset } from "@/lib/storage/cloudinary";
 import { receiptSchema } from "@/lib/validators";
 
 function getErrorMessage(error: unknown) {
@@ -35,19 +33,7 @@ function getErrorStatus(error: unknown) {
   return 500;
 }
 
-function toReceiptDate(value: string | null) {
-  if (!value) {
-    return null;
-  }
-
-  const date = new Date(value);
-
-  return Number.isNaN(date.getTime()) ? null : date;
-}
-
 export async function POST(req: Request) {
-  let publicId: string | null = null;
-
   try {
     const user = await getCurrentUser();
 
@@ -84,8 +70,6 @@ export async function POST(req: Request) {
       );
     }
 
-    publicId = body.publicId;
-
     const imageResponse = await fetch(body.imageUrl);
 
     if (!imageResponse.ok) {
@@ -105,26 +89,14 @@ export async function POST(req: Request) {
       tax: validated.tax,
     });
 
-    const saved = await createReceipt({
-      userId: user.id,
-      merchant: validated.merchant,
-      merchantBrand: validated.merchant_brand,
-      total: normalizedTotal?.toString() ?? null,
-      currency: validated.currency,
-      date: toReceiptDate(validated.date),
-      time: validated.time,
-      category: validated.category,
-      items: validated.items,
-      tax: validated.tax,
-      metadata: validated.metadata ?? null,
-      parserConfigId: validated.parser_config_id ?? null,
-    });
-
     return Response.json({
       success: true,
       data: {
-        parsed: validated,
-        saved,
+        parsed: {
+          ...validated,
+          total: normalizedTotal,
+        },
+        cloudinaryPublicId: body.publicId,
       },
     });
   } catch (error) {
@@ -140,11 +112,5 @@ export async function POST(req: Request) {
         })(),
       },
     );
-  } finally {
-    if (publicId) {
-      try {
-        await deleteCloudinaryAsset({ publicId });
-      } catch {}
-    }
   }
 }
