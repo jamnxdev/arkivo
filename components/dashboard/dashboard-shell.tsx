@@ -11,10 +11,8 @@ type DashboardShellProps = {
 };
 
 export function DashboardShell({ children }: DashboardShellProps) {
-  let isTabletViewport = useMediaQuery("(max-width: 1023px)");
+  const isTabletViewport = useMediaQuery("(max-width: 1023px)");
   const previewWidthClass = isTabletViewport ? "w-full" : "max-w-2xl";
-
-  isTabletViewport = env.DEV;
 
   return (
     <div className="min-h-screen">
