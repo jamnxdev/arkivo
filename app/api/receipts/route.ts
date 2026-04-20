@@ -3,7 +3,10 @@ import { createReceipt, getReceipts } from "@/lib/db/queries/receipts";
 import { setRlsUserContext } from "@/lib/db/rls";
 import { normalizeReceiptTotal } from "@/lib/receipts/normalize-total";
 import { deleteCloudinaryAsset } from "@/lib/storage/cloudinary";
-import { reviewedReceiptSaveSchema } from "@/lib/validators";
+import {
+  type ReviewedReceiptSaveInput,
+  reviewedReceiptSaveSchema,
+} from "@/lib/validators";
 
 function toReceiptDate(value: string | null) {
   if (!value) {
@@ -28,8 +31,9 @@ export async function POST(req: Request) {
     }
 
     await setRlsUserContext(user.id);
-    const body = await req.json();
-    const validated = reviewedReceiptSaveSchema.parse(body);
+    const body: unknown = await req.json();
+    const validated: ReviewedReceiptSaveInput =
+      reviewedReceiptSaveSchema.parse(body);
     const roundedItems = validated.items?.map((item) => ({
       ...item,
       price: roundToTwo(item.price),

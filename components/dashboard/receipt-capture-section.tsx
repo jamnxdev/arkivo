@@ -1,6 +1,6 @@
 "use client";
 
-import { Camera, UploadSimple } from "@phosphor-icons/react";
+import { Camera, NotePencil, UploadSimple } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  getManualReceiptMissingFields,
+  hasMeaningfulReceiptContent,
+  hasRequiredManualReceiptFields,
+} from "@/lib/validators";
 
 interface ReceiptCaptureSectionProps {
   onReceiptSaved?: () => void;
@@ -67,6 +72,20 @@ interface NotificationToast {
   description: string;
   tone: "error" | "success";
 }
+
+const EMPTY_RECEIPT_DRAFT: ReceiptDraft = {
+  merchant: null,
+  merchantBrand: null,
+  total: null,
+  currency: "EUR",
+  date: null,
+  time: null,
+  category: "misc",
+  items: [],
+  tax: {},
+  metadata: null,
+  parserConfigId: null,
+};
 
 function roundToTwo(value: number) {
   return Math.round(value * 100) / 100;
@@ -186,6 +205,40 @@ export function ReceiptCaptureSection({
         )
       : null,
   });
+
+  const openManualReceiptEntry = async () => {
+    if (pendingPublicId) {
+      await cleanupUploadedAsset(pendingPublicId);
+    }
+
+    setPendingPublicId(null);
+    setSelectedFileName(null);
+    setError(null);
+    setDraft({ ...EMPTY_RECEIPT_DRAFT, items: [], tax: {} });
+    setReviewOpen(true);
+  };
+
+  const isDraftEmpty = draft
+    ? !hasMeaningfulReceiptContent({
+        merchant: draft.merchant,
+        merchantBrand: draft.merchantBrand,
+        total: draft.total,
+        date: draft.date,
+        time: draft.time,
+        items: draft.items,
+        tax: draft.tax,
+      })
+    : true;
+  const isManualDraft = pendingPublicId === null;
+  const isManualDraftMissingRequiredFields = draft
+    ? !hasRequiredManualReceiptFields({
+        merchant: draft.merchant,
+        total: draft.total,
+        currency: draft.currency,
+        date: draft.date,
+        category: draft.category,
+      })
+    : true;
 
   const resetReviewState = () => {
     setReviewOpen(false);
@@ -321,6 +374,27 @@ export function ReceiptCaptureSection({
       return;
     }
 
+    if (isDraftEmpty) {
+      const message = "Add at least one receipt detail before saving.";
+      setError(message);
+      addNotification("Receipt is empty", message, "error");
+      return;
+    }
+
+    if (isManualDraft && isManualDraftMissingRequiredFields) {
+      const missingFields = getManualReceiptMissingFields({
+        merchant: draft.merchant,
+        total: draft.total,
+        currency: draft.currency,
+        date: draft.date,
+        category: draft.category,
+      });
+      const message = `Manual receipts require: ${missingFields.join(", ")}.`;
+      setError(message);
+      addNotification("Missing required fields", message, "error");
+      return;
+    }
+
     setIsSaving(true);
     setError(null);
 
@@ -382,12 +456,12 @@ export function ReceiptCaptureSection({
       <div>
         <h2 className="text-lg font-semibold">Add receipt</h2>
         <p className="text-xs text-muted-foreground">
-          Upload an image or capture one with your camera
+          Upload an image, capture one with your camera, or add a receipt manually
         </p>
       </div>
 
       <div className="rounded-xl border bg-card p-4">
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3 sm:grid-cols-3">
           <Button
             onClick={() => uploadInputRef.current?.click()}
             size="sm"
@@ -405,6 +479,18 @@ export function ReceiptCaptureSection({
           >
             <Camera />
             {isUploading ? "Processing..." : "Take image"}
+          </Button>
+
+          <Button
+            onClick={() => {
+              void openManualReceiptEntry();
+            }}
+            size="sm"
+            variant="secondary"
+            disabled={isUploading || isSaving}
+          >
+            <NotePencil />
+            Add manually
           </Button>
         </div>
 
@@ -435,7 +521,12 @@ export function ReceiptCaptureSection({
       <Dialog
         open={reviewOpen}
         onOpenChange={(open) => {
-          if (open) setReviewOpen(true);
+          if (open) {
+            setReviewOpen(true);
+            return;
+          }
+
+          void clearPendingAssetAndReview();
         }}
       >
         <DialogContent
@@ -445,93 +536,93 @@ export function ReceiptCaptureSection({
           <DialogHeader className="px-6 pt-6">
             <DialogTitle>Review receipt details</DialogTitle>
             <DialogDescription>
-              Edit extracted values before saving this receipt.
+              Edit the receipt details before saving this record.
             </DialogDescription>
           </DialogHeader>
 
           {draft ? (
             <div className="flex-1 overflow-y-auto px-6 py-4">
               <div className="space-y-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <Input
-                  value={draft.merchant ?? ""}
-                  onChange={(event) =>
-                    setDraft((prev) =>
-                      prev
-                        ? { ...prev, merchant: event.target.value || null }
-                        : prev,
-                    )
-                  }
-                  placeholder="Merchant"
-                />
-                <Input
-                  value={draft.merchantBrand ?? ""}
-                  onChange={(event) =>
-                    setDraft((prev) =>
-                      prev
-                        ? { ...prev, merchantBrand: event.target.value || null }
-                        : prev,
-                    )
-                  }
-                  placeholder="Brand"
-                />
-                <Input
-                  type="number"
-                  step="0.01"
-                  value={toTwoDecimalString(draft.total)}
-                  onChange={(event) =>
-                    setDraft((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            total:
-                              event.target.value === ""
-                                ? null
-                                : Number(event.target.value),
-                          }
-                        : prev,
-                    )
-                  }
-                  onBlur={() =>
-                    setDraft((prev) =>
-                      prev
-                        ? {
-                            ...prev,
-                            total: prev.total === null ? null : roundToTwo(prev.total),
-                          }
-                        : prev,
-                    )
-                  }
-                  placeholder="Total"
-                />
-                <Input
-                  value={draft.currency}
-                  onChange={(event) =>
-                    setDraft((prev) =>
-                      prev ? { ...prev, currency: event.target.value || "EUR" } : prev,
-                    )
-                  }
-                  placeholder="Currency"
-                />
-                <Input
-                  type="date"
-                  value={draft.date ?? ""}
-                  onChange={(event) =>
-                    setDraft((prev) =>
-                      prev ? { ...prev, date: event.target.value || null } : prev,
-                    )
-                  }
-                />
-                <Input
-                  type="time"
-                  value={draft.time ?? ""}
-                  onChange={(event) =>
-                    setDraft((prev) =>
-                      prev ? { ...prev, time: event.target.value || null } : prev,
-                    )
-                  }
-                />
-              </div>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Input
+                    value={draft.merchant ?? ""}
+                    onChange={(event) =>
+                      setDraft((prev) =>
+                        prev
+                          ? { ...prev, merchant: event.target.value || null }
+                          : prev,
+                      )
+                    }
+                    placeholder="Merchant"
+                  />
+                  <Input
+                    value={draft.merchantBrand ?? ""}
+                    onChange={(event) =>
+                      setDraft((prev) =>
+                        prev
+                          ? { ...prev, merchantBrand: event.target.value || null }
+                          : prev,
+                      )
+                    }
+                    placeholder="Brand"
+                  />
+                  <Input
+                    type="number"
+                    step="0.01"
+                    value={toTwoDecimalString(draft.total)}
+                    onChange={(event) =>
+                      setDraft((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              total:
+                                event.target.value === ""
+                                  ? null
+                                  : Number(event.target.value),
+                            }
+                          : prev,
+                      )
+                    }
+                    onBlur={() =>
+                      setDraft((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              total: prev.total === null ? null : roundToTwo(prev.total),
+                            }
+                          : prev,
+                      )
+                    }
+                    placeholder="Total"
+                  />
+                  <Input
+                    value={draft.currency}
+                    onChange={(event) =>
+                      setDraft((prev) =>
+                        prev ? { ...prev, currency: event.target.value || "EUR" } : prev,
+                      )
+                    }
+                    placeholder="Currency"
+                  />
+                  <Input
+                    type="date"
+                    value={draft.date ?? ""}
+                    onChange={(event) =>
+                      setDraft((prev) =>
+                        prev ? { ...prev, date: event.target.value || null } : prev,
+                      )
+                    }
+                  />
+                  <Input
+                    type="time"
+                    value={draft.time ?? ""}
+                    onChange={(event) =>
+                      setDraft((prev) =>
+                        prev ? { ...prev, time: event.target.value || null } : prev,
+                      )
+                    }
+                  />
+                </div>
 
               <div className="space-y-2">
                 <p className="text-sm font-medium">Category</p>
@@ -766,7 +857,15 @@ export function ReceiptCaptureSection({
             >
               Cancel
             </Button>
-            <Button disabled={isSaving || !draft} onClick={handleSave}>
+            <Button
+              disabled={
+                isSaving ||
+                !draft ||
+                isDraftEmpty ||
+                (isManualDraft && isManualDraftMissingRequiredFields)
+              }
+              onClick={handleSave}
+            >
               {isSaving ? "Saving..." : "Save receipt"}
             </Button>
           </DialogFooter>
