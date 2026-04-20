@@ -53,11 +53,11 @@ function SelectPopup({
 }: React.ComponentProps<typeof SelectPrimitive.Popup>) {
   return (
     <SelectPrimitive.Portal>
-      <SelectPrimitive.Positioner sideOffset={6}>
+      <SelectPrimitive.Positioner sideOffset={6} className="z-[80]">
         <SelectPrimitive.Popup
           data-slot="select-popup"
           className={cn(
-            "relative z-50 max-h-96 min-w-32 overflow-auto rounded-xl border bg-popover p-1 text-popover-foreground shadow-md transition-[opacity,transform] outline-none data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
+            "relative z-[81] max-h-96 min-w-32 overflow-auto rounded-xl border bg-popover p-1 text-popover-foreground shadow-md transition-[opacity,transform] outline-none data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
             className,
           )}
           {...props}

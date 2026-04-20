@@ -24,11 +24,11 @@ function PopoverContent({
 }: React.ComponentProps<typeof PopoverPrimitive.Popup>) {
   return (
     <PopoverPrimitive.Portal>
-      <PopoverPrimitive.Positioner sideOffset={6}>
+      <PopoverPrimitive.Positioner sideOffset={6} className="z-[80]">
         <PopoverPrimitive.Popup
           data-slot="popover-content"
           className={cn(
-            "z-50 w-72 rounded-xl border bg-popover p-3 text-popover-foreground shadow-md transition-[opacity,transform] outline-none data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
+            "z-[81] w-72 rounded-xl border bg-popover p-3 text-popover-foreground shadow-md transition-[opacity,transform] outline-none data-[ending-style]:scale-95 data-[ending-style]:opacity-0 data-[starting-style]:scale-95 data-[starting-style]:opacity-0",
             className,
           )}
           {...props}

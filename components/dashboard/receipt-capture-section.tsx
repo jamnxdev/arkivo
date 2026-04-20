@@ -4,6 +4,7 @@ import { Camera, NotePencil, UploadSimple } from "@phosphor-icons/react";
 import { useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { DatePicker } from "@/components/ui/date-picker";
 import {
   Dialog,
   DialogContent,
@@ -110,6 +111,25 @@ const CATEGORY_OPTIONS = [
   "travel",
   "misc",
 ] as const;
+
+const TIME_OPTIONS = Array.from({ length: 48 }, (_, index) => {
+  const hour = String(Math.floor(index / 2)).padStart(2, "0");
+  const minute = index % 2 === 0 ? "00" : "30";
+  return `${hour}:${minute}`;
+});
+
+function normalizeTimeValue(value: string | null) {
+  if (!value) {
+    return null;
+  }
+
+  const [hour = "", minute = ""] = value.split(":");
+  if (!hour || !minute) {
+    return null;
+  }
+
+  return `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`;
+}
 
 export function ReceiptCaptureSection({
   onReceiptSaved,
@@ -604,24 +624,37 @@ export function ReceiptCaptureSection({
                     }
                     placeholder="Currency"
                   />
-                  <Input
-                    type="date"
+                  <DatePicker
                     value={draft.date ?? ""}
-                    onChange={(event) =>
+                    onChange={(value) =>
+                      setDraft((prev) => (prev ? { ...prev, date: value || null } : prev))
+                    }
+                    placeholder="Select date"
+                  />
+                  <Select
+                    value={normalizeTimeValue(draft.time) ?? undefined}
+                    onValueChange={(value) =>
                       setDraft((prev) =>
-                        prev ? { ...prev, date: event.target.value || null } : prev,
+                        prev
+                          ? {
+                              ...prev,
+                              time: String(value),
+                            }
+                          : prev,
                       )
                     }
-                  />
-                  <Input
-                    type="time"
-                    value={draft.time ?? ""}
-                    onChange={(event) =>
-                      setDraft((prev) =>
-                        prev ? { ...prev, time: event.target.value || null } : prev,
-                      )
-                    }
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select time" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TIME_OPTIONS.map((timeOption) => (
+                        <SelectItem key={timeOption} value={timeOption}>
+                          {timeOption}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
               <div className="space-y-2">
