@@ -15,17 +15,17 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import { Input } from "@/components/ui/input";
 import {
-  formatCurrencyByPreference,
-  formatDateByPreference,
-  getCurrencySymbolByPreference,
-} from "@/lib/settings/preferences";
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  formatCurrencyByPreference,
+  formatDateByPreference,
+  getCurrencySymbolByPreference,
+} from "@/lib/settings/preferences";
 import { cn } from "@/lib/utils";
 
 type ReceiptListItem = {

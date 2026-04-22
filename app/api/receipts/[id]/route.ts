@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
-import { setRlsUserContext } from "@/lib/db/rls";
 import { deleteReceipt, updateReceipt } from "@/lib/db/queries/receipts";
+import { setRlsUserContext } from "@/lib/db/rls";
 
 type RouteParams = {
   params: Promise<{

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
-import { buildStatsAnalyticsData } from "@/components/stats/stats-mock-data";
 import {
   AreaSpendingTrendSection,
   DenseSpendingTrendSection,
@@ -12,6 +11,7 @@ import {
   SegmentBarSection,
   StatsPageHeader,
 } from "@/components/stats";
+import { buildStatsAnalyticsData } from "@/components/stats/stats-mock-data";
 
 type ReceiptApiItem = {
   total?: number | string | null;

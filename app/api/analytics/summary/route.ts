@@ -1,6 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
-import { setRlsUserContext } from "@/lib/db/rls";
 import { getSummary } from "@/lib/db/queries/analytics";
+import { setRlsUserContext } from "@/lib/db/rls";
 
 export async function GET() {
   const user = await getCurrentUser();

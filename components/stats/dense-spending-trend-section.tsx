@@ -14,7 +14,7 @@ import {
   formatCurrency,
   formatShortDate,
 } from "@/components/stats/stats-format";
-import { type SpendingPoint } from "@/components/stats/stats-mock-data";
+import type { SpendingPoint } from "@/components/stats/stats-mock-data";
 import { StatsSectionCard } from "@/components/stats/stats-section-card";
 import {
   buildOrderedTrendChart,
