@@ -34,7 +34,9 @@ export default function DashboardStatsPage() {
         }
         setData(
           buildStatsAnalyticsData(
-            Array.isArray(payload.data) ? (payload.data as ReceiptApiItem[]) : [],
+            Array.isArray(payload.data)
+              ? (payload.data as ReceiptApiItem[])
+              : [],
           ),
         );
         setError(null);
@@ -52,9 +54,7 @@ export default function DashboardStatsPage() {
     <DashboardShell>
       <section className="space-y-4">
         <StatsPageHeader />
-        {error ? (
-          <p className="text-sm text-destructive">{error}</p>
-        ) : null}
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
         <div className="grid gap-4">
           <DenseSpendingTrendSection
             dailySpending={data.dailySpending}

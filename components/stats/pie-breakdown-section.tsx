@@ -24,7 +24,9 @@ interface PieBreakdownSectionProps {
   breakdownByView: Record<ViewKey, BreakdownRow[]>;
 }
 
-export function PieBreakdownSection({ breakdownByView }: PieBreakdownSectionProps) {
+export function PieBreakdownSection({
+  breakdownByView,
+}: PieBreakdownSectionProps) {
   const [view, setView] = useState<ViewKey>("category");
   const [metric, setMetric] = useState<MetricMode>("amount");
   const [top, setTop] = useState<TopCount>("all");

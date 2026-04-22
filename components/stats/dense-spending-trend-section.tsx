@@ -49,14 +49,7 @@ export function DenseSpendingTrendSection({
   );
 
   const chartData = useMemo(
-    () =>
-      buildOrderedTrendChart(
-        dailySpending,
-        range,
-        grain,
-        order,
-        todayIso,
-      ),
+    () => buildOrderedTrendChart(dailySpending, range, grain, order, todayIso),
     [dailySpending, grain, order, range, todayIso],
   );
 

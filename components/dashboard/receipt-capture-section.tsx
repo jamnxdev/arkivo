@@ -198,13 +198,17 @@ export function ReceiptCaptureSection({
     date: parsed.date,
     time: parsed.time,
     category: parsed.category,
-    items: parsed.items?.map((item) => ({
-      ...item,
-      price: roundToTwo(item.price),
-    })) ?? null,
+    items:
+      parsed.items?.map((item) => ({
+        ...item,
+        price: roundToTwo(item.price),
+      })) ?? null,
     tax: parsed.tax
       ? Object.fromEntries(
-          Object.entries(parsed.tax).map(([key, value]) => [key, roundToTwo(value)]),
+          Object.entries(parsed.tax).map(([key, value]) => [
+            key,
+            roundToTwo(value),
+          ]),
         )
       : null,
     metadata: parsed.metadata ?? null,
@@ -221,7 +225,10 @@ export function ReceiptCaptureSection({
       })) ?? null,
     tax: input.tax
       ? Object.fromEntries(
-          Object.entries(input.tax).map(([key, value]) => [key, roundToTwo(value)]),
+          Object.entries(input.tax).map(([key, value]) => [
+            key,
+            roundToTwo(value),
+          ]),
         )
       : null,
   });
@@ -321,7 +328,10 @@ export function ReceiptCaptureSection({
         const uploadFormData = new FormData();
         uploadFormData.append("file", file);
         uploadFormData.append("api_key", signaturePayload.data.apiKey);
-        uploadFormData.append("timestamp", String(signaturePayload.data.timestamp));
+        uploadFormData.append(
+          "timestamp",
+          String(signaturePayload.data.timestamp),
+        );
         uploadFormData.append("signature", signaturePayload.data.signature);
         uploadFormData.append("folder", signaturePayload.data.folder);
         uploadFormData.append("public_id", signaturePayload.data.publicId);
@@ -356,7 +366,11 @@ export function ReceiptCaptureSection({
 
         if (!ingestRes.ok || !ingestPayload.success) {
           throw new Error(
-            parseApiError(ingestRes, ingestPayload, "Failed to process receipt"),
+            parseApiError(
+              ingestRes,
+              ingestPayload,
+              "Failed to process receipt",
+            ),
           );
         }
 
@@ -435,19 +449,29 @@ export function ReceiptCaptureSection({
       const savePayload = await saveRes.json();
 
       if (!saveRes.ok || !savePayload.success) {
-        throw new Error(parseApiError(saveRes, savePayload, "Failed to save receipt"));
+        throw new Error(
+          parseApiError(saveRes, savePayload, "Failed to save receipt"),
+        );
       }
 
       resetReviewState();
       onReceiptSaved?.();
-      addNotification("Receipt saved", "Your receipt has been stored.", "success");
+      addNotification(
+        "Receipt saved",
+        "Your receipt has been stored.",
+        "success",
+      );
     } catch (saveError) {
       setError(
-        saveError instanceof Error ? saveError.message : "Failed to save receipt",
+        saveError instanceof Error
+          ? saveError.message
+          : "Failed to save receipt",
       );
       addNotification(
         "Save failed",
-        saveError instanceof Error ? saveError.message : "Failed to save receipt",
+        saveError instanceof Error
+          ? saveError.message
+          : "Failed to save receipt",
         "error",
       );
     } finally {
@@ -476,7 +500,8 @@ export function ReceiptCaptureSection({
       <div>
         <h2 className="text-lg font-semibold">Add receipt</h2>
         <p className="text-xs text-muted-foreground">
-          Upload an image, capture one with your camera, or add a receipt manually
+          Upload an image, capture one with your camera, or add a receipt
+          manually
         </p>
       </div>
 
@@ -535,7 +560,9 @@ export function ReceiptCaptureSection({
             ? `Selected: ${selectedFileName}`
             : "No image selected"}
         </p>
-        {error ? <p className="mt-2 text-xs text-destructive">{error}</p> : null}
+        {error ? (
+          <p className="mt-2 text-xs text-destructive">{error}</p>
+        ) : null}
       </div>
 
       <Dialog
@@ -580,7 +607,10 @@ export function ReceiptCaptureSection({
                     onChange={(event) =>
                       setDraft((prev) =>
                         prev
-                          ? { ...prev, merchantBrand: event.target.value || null }
+                          ? {
+                              ...prev,
+                              merchantBrand: event.target.value || null,
+                            }
                           : prev,
                       )
                     }
@@ -608,7 +638,10 @@ export function ReceiptCaptureSection({
                         prev
                           ? {
                               ...prev,
-                              total: prev.total === null ? null : roundToTwo(prev.total),
+                              total:
+                                prev.total === null
+                                  ? null
+                                  : roundToTwo(prev.total),
                             }
                           : prev,
                       )
@@ -619,7 +652,9 @@ export function ReceiptCaptureSection({
                     value={draft.currency}
                     onChange={(event) =>
                       setDraft((prev) =>
-                        prev ? { ...prev, currency: event.target.value || "EUR" } : prev,
+                        prev
+                          ? { ...prev, currency: event.target.value || "EUR" }
+                          : prev,
                       )
                     }
                     placeholder="Currency"
@@ -627,7 +662,9 @@ export function ReceiptCaptureSection({
                   <DatePicker
                     value={draft.date ?? ""}
                     onChange={(value) =>
-                      setDraft((prev) => (prev ? { ...prev, date: value || null } : prev))
+                      setDraft((prev) =>
+                        prev ? { ...prev, date: value || null } : prev,
+                      )
                     }
                     placeholder="Select date"
                   />
@@ -657,226 +694,241 @@ export function ReceiptCaptureSection({
                   </Select>
                 </div>
 
-              <div className="space-y-2">
-                <p className="text-sm font-medium">Category</p>
-                <Select
-                  value={draft.category ?? "misc"}
-                  onValueChange={(value) =>
-                    setDraft((prev) =>
-                      prev ? { ...prev, category: String(value) } : prev,
-                    )
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {CATEGORY_OPTIONS.map((category) => (
-                      <SelectItem key={category} value={category}>
-                        {category}
-                      </SelectItem>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium">Category</p>
+                  <Select
+                    value={draft.category ?? "misc"}
+                    onValueChange={(value) =>
+                      setDraft((prev) =>
+                        prev ? { ...prev, category: String(value) } : prev,
+                      )
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CATEGORY_OPTIONS.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">Tax lines</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        setDraft((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                tax: {
+                                  ...(prev.tax ?? {}),
+                                  [`tax-${Object.keys(prev.tax ?? {}).length + 1}`]: 0,
+                                },
+                              }
+                            : prev,
+                        )
+                      }
+                    >
+                      Add tax
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {Object.entries(draft.tax ?? {}).map(([key, value]) => (
+                      <div key={key} className="grid gap-2 sm:grid-cols-3">
+                        <Input
+                          value={key}
+                          onChange={(event) =>
+                            setDraft((prev) => {
+                              if (!prev?.tax) return prev;
+
+                              const nextTax = { ...prev.tax };
+                              const amount = nextTax[key];
+                              delete nextTax[key];
+                              nextTax[event.target.value || key] = amount;
+
+                              return { ...prev, tax: nextTax };
+                            })
+                          }
+                          placeholder="Tax label"
+                        />
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={toTwoDecimalString(value)}
+                          onChange={(event) =>
+                            setDraft((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    tax: {
+                                      ...(prev.tax ?? {}),
+                                      [key]: Number(event.target.value) || 0,
+                                    },
+                                  }
+                                : prev,
+                            )
+                          }
+                          onBlur={() =>
+                            setDraft((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    tax: {
+                                      ...(prev.tax ?? {}),
+                                      [key]: roundToTwo(
+                                        (prev.tax ?? {})[key] ?? 0,
+                                      ),
+                                    },
+                                  }
+                                : prev,
+                            )
+                          }
+                          placeholder="Amount"
+                        />
+                        <Button
+                          variant="destructive"
+                          onClick={() =>
+                            setDraft((prev) => {
+                              if (!prev?.tax) return prev;
+
+                              const nextTax = { ...prev.tax };
+                              delete nextTax[key];
+
+                              return { ...prev, tax: nextTax };
+                            })
+                          }
+                        >
+                          Remove
+                        </Button>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">Tax lines</p>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      setDraft((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              tax: {
-                                ...(prev.tax ?? {}),
-                                [`tax-${Object.keys(prev.tax ?? {}).length + 1}`]: 0,
-                              },
-                            }
-                          : prev,
-                      )
-                    }
-                  >
-                    Add tax
-                  </Button>
+                  </div>
                 </div>
+
                 <div className="space-y-2">
-                  {Object.entries(draft.tax ?? {}).map(([key, value]) => (
-                    <div key={key} className="grid gap-2 sm:grid-cols-3">
-                      <Input
-                        value={key}
-                        onChange={(event) =>
-                          setDraft((prev) => {
-                            if (!prev?.tax) return prev;
-
-                            const nextTax = { ...prev.tax };
-                            const amount = nextTax[key];
-                            delete nextTax[key];
-                            nextTax[event.target.value || key] = amount;
-
-                            return { ...prev, tax: nextTax };
-                          })
-                        }
-                        placeholder="Tax label"
-                      />
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={toTwoDecimalString(value)}
-                        onChange={(event) =>
-                          setDraft((prev) =>
-                            prev
-                              ? {
-                                  ...prev,
-                                  tax: {
-                                    ...(prev.tax ?? {}),
-                                    [key]: Number(event.target.value) || 0,
-                                  },
-                                }
-                              : prev,
-                          )
-                        }
-                        onBlur={() =>
-                          setDraft((prev) =>
-                            prev
-                              ? {
-                                  ...prev,
-                                  tax: {
-                                    ...(prev.tax ?? {}),
-                                    [key]: roundToTwo((prev.tax ?? {})[key] ?? 0),
-                                  },
-                                }
-                              : prev,
-                          )
-                        }
-                        placeholder="Amount"
-                      />
-                      <Button
-                        variant="destructive"
-                        onClick={() =>
-                          setDraft((prev) => {
-                            if (!prev?.tax) return prev;
-
-                            const nextTax = { ...prev.tax };
-                            delete nextTax[key];
-
-                            return { ...prev, tax: nextTax };
-                          })
-                        }
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium">Items</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() =>
+                        setDraft((prev) =>
+                          prev
+                            ? {
+                                ...prev,
+                                items: [
+                                  ...(prev.items ?? []),
+                                  { name: "", price: 0 },
+                                ],
+                              }
+                            : prev,
+                        )
+                      }
+                    >
+                      Add item
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    {(draft.items ?? []).map((item, index) => (
+                      <div
+                        key={`${item.name}-${index}`}
+                        className="grid gap-2 sm:grid-cols-3"
                       >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
+                        <Input
+                          value={item.name}
+                          placeholder="Item name"
+                          onChange={(event) =>
+                            setDraft((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    items: (prev.items ?? []).map(
+                                      (entry, entryIndex) =>
+                                        entryIndex === index
+                                          ? {
+                                              ...entry,
+                                              name: event.target.value,
+                                            }
+                                          : entry,
+                                    ),
+                                  }
+                                : prev,
+                            )
+                          }
+                        />
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={toTwoDecimalString(item.price)}
+                          placeholder="Price"
+                          onChange={(event) =>
+                            setDraft((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    items: (prev.items ?? []).map(
+                                      (entry, entryIndex) =>
+                                        entryIndex === index
+                                          ? {
+                                              ...entry,
+                                              price:
+                                                Number(event.target.value) || 0,
+                                            }
+                                          : entry,
+                                    ),
+                                  }
+                                : prev,
+                            )
+                          }
+                          onBlur={() =>
+                            setDraft((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    items: (prev.items ?? []).map(
+                                      (entry, entryIndex) =>
+                                        entryIndex === index
+                                          ? {
+                                              ...entry,
+                                              price: roundToTwo(entry.price),
+                                            }
+                                          : entry,
+                                    ),
+                                  }
+                                : prev,
+                            )
+                          }
+                        />
+                        <Button
+                          variant="destructive"
+                          onClick={() =>
+                            setDraft((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    items: (prev.items ?? []).filter(
+                                      (_, entryIndex) => entryIndex !== index,
+                                    ),
+                                  }
+                                : prev,
+                            )
+                          }
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium">Items</p>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() =>
-                      setDraft((prev) =>
-                        prev
-                          ? {
-                              ...prev,
-                              items: [...(prev.items ?? []), { name: "", price: 0 }],
-                            }
-                          : prev,
-                      )
-                    }
-                  >
-                    Add item
-                  </Button>
-                </div>
-                <div className="space-y-2">
-                  {(draft.items ?? []).map((item, index) => (
-                    <div key={`${item.name}-${index}`} className="grid gap-2 sm:grid-cols-3">
-                      <Input
-                        value={item.name}
-                        placeholder="Item name"
-                        onChange={(event) =>
-                          setDraft((prev) =>
-                            prev
-                              ? {
-                                  ...prev,
-                                  items: (prev.items ?? []).map((entry, entryIndex) =>
-                                    entryIndex === index
-                                      ? { ...entry, name: event.target.value }
-                                      : entry,
-                                  ),
-                                }
-                              : prev,
-                          )
-                        }
-                      />
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={toTwoDecimalString(item.price)}
-                        placeholder="Price"
-                        onChange={(event) =>
-                          setDraft((prev) =>
-                            prev
-                              ? {
-                                  ...prev,
-                                  items: (prev.items ?? []).map((entry, entryIndex) =>
-                                    entryIndex === index
-                                      ? {
-                                          ...entry,
-                                          price: Number(event.target.value) || 0,
-                                        }
-                                      : entry,
-                                  ),
-                                }
-                              : prev,
-                          )
-                        }
-                        onBlur={() =>
-                          setDraft((prev) =>
-                            prev
-                              ? {
-                                  ...prev,
-                                  items: (prev.items ?? []).map((entry, entryIndex) =>
-                                    entryIndex === index
-                                      ? {
-                                          ...entry,
-                                          price: roundToTwo(entry.price),
-                                        }
-                                      : entry,
-                                  ),
-                                }
-                              : prev,
-                          )
-                        }
-                      />
-                      <Button
-                        variant="destructive"
-                        onClick={() =>
-                          setDraft((prev) =>
-                            prev
-                              ? {
-                                  ...prev,
-                                  items: (prev.items ?? []).filter(
-                                    (_, entryIndex) => entryIndex !== index,
-                                  ),
-                                }
-                              : prev,
-                          )
-                        }
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
             </div>
           ) : null}
 

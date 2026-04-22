@@ -70,11 +70,7 @@ export function ChartTooltip({
   const isHorizontal = orientation === "horizontal";
 
   const isClient = useIsClient();
-  const portalRoot = useChartPortalRoot(
-    containerRef,
-    isClient,
-    width + height,
-  );
+  const portalRoot = useChartPortalRoot(containerRef, isClient, width + height);
 
   const visible = tooltipData !== null;
   const x = tooltipData?.x ?? 0;
@@ -133,11 +129,15 @@ export function ChartTooltip({
       return barXAccessor(tooltipData.point);
     }
     // For line/area charts, use the date
-    return formatDateByPreference(xAccessor(tooltipData.point), {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
-    }, { useDatePreset: false });
+    return formatDateByPreference(
+      xAccessor(tooltipData.point),
+      {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+      },
+      { useDatePreset: false },
+    );
   }, [tooltipData, barXAccessor, xAccessor]);
 
   if (!(isClient && portalRoot)) {

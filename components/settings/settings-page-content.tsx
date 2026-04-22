@@ -42,7 +42,9 @@ export function SettingsPageContent() {
     );
     const storedDateLocale = window.localStorage.getItem("settings.dateLocale");
     const storedDateFormat = window.localStorage.getItem("settings.dateFormat");
-    const storedTaxRate = window.localStorage.getItem("settings.defaultTaxRate");
+    const storedTaxRate = window.localStorage.getItem(
+      "settings.defaultTaxRate",
+    );
 
     if (storedCurrency) {
       setDefaultCurrency(storedCurrency);
@@ -95,8 +97,8 @@ export function SettingsPageContent() {
         </p>
         <h1 className="text-2xl font-semibold tracking-tight">Preferences</h1>
         <p className="text-sm text-muted-foreground">
-          Account, appearance, and session. Data export and account deletion will
-          ship in a later release.
+          Account, appearance, and session. Data export and account deletion
+          will ship in a later release.
         </p>
       </header>
 
@@ -176,7 +178,7 @@ export function SettingsPageContent() {
                 D
               </kbd>{" "}
               anywhere outside a field to toggle light and dark (
-              {themeMounted ? resolvedTheme ?? "…" : "…"} preview).
+              {themeMounted ? (resolvedTheme ?? "…") : "…"} preview).
             </p>
           </div>
         </StatsSectionCard>
@@ -281,13 +283,9 @@ export function SettingsPageContent() {
               />
             </div>
           </div>
-
         </StatsSectionCard>
 
-        <StatsSectionCard
-          title="Session"
-          subtitle="Sign out on this device."
-        >
+        <StatsSectionCard title="Session" subtitle="Sign out on this device.">
           <Button
             type="button"
             variant="destructive"

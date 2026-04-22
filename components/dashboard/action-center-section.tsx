@@ -44,7 +44,9 @@ function formatReceiptDate(value: string | null) {
   });
 }
 
-export function ActionCenterSection({ refreshToken = 0 }: ActionCenterSectionProps) {
+export function ActionCenterSection({
+  refreshToken = 0,
+}: ActionCenterSectionProps) {
   const [receipts, setReceipts] = useState<ReceiptItem[]>([]);
 
   useEffect(() => {
@@ -76,7 +78,10 @@ export function ActionCenterSection({ refreshToken = 0 }: ActionCenterSectionPro
     };
 
     void loadReceipts();
-    const intervalId = window.setInterval(loadReceipts, REALTIME_REFRESH_INTERVAL_MS);
+    const intervalId = window.setInterval(
+      loadReceipts,
+      REALTIME_REFRESH_INTERVAL_MS,
+    );
 
     return () => {
       isMounted = false;
@@ -85,7 +90,8 @@ export function ActionCenterSection({ refreshToken = 0 }: ActionCenterSectionPro
   }, [refreshToken]);
 
   const totalRecentSpend = useMemo(
-    () => receipts.reduce((sum, receipt) => sum + parseAmount(receipt.total), 0),
+    () =>
+      receipts.reduce((sum, receipt) => sum + parseAmount(receipt.total), 0),
     [receipts],
   );
 
@@ -98,10 +104,8 @@ export function ActionCenterSection({ refreshToken = 0 }: ActionCenterSectionPro
             Latest synced expenses and categories
           </p>
         </div>
-        <Button asChild size="sm" variant="outline">
-          <Link href="/dashboard/receipts">
-          View all
-          </Link>
+        <Button size="sm" variant="outline">
+          <Link href="/dashboard/receipts">View all</Link>
         </Button>
       </div>
 
@@ -118,7 +122,8 @@ export function ActionCenterSection({ refreshToken = 0 }: ActionCenterSectionPro
                     {receipt.merchant ?? "Unknown merchant"}
                   </p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {formatReceiptDate(receipt.date)} · {receipt.category ?? "Uncategorized"}
+                    {formatReceiptDate(receipt.date)} ·{" "}
+                    {receipt.category ?? "Uncategorized"}
                   </p>
                 </div>
                 <p className="text-sm font-semibold tracking-tight">

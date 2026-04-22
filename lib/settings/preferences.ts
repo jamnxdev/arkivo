@@ -73,11 +73,12 @@ export function formatDateByPreference(
   }
 
   // TODO(settings): expand this mapping when additional user date format presets are added.
-  const optionsByFormat: Record<DateFormatOption, Intl.DateTimeFormatOptions> = {
-    "dd/mm/yyyy": { day: "2-digit", month: "2-digit", year: "numeric" },
-    "mm/dd/yyyy": { month: "2-digit", day: "2-digit", year: "numeric" },
-    "yyyy-mm-dd": { year: "numeric", month: "2-digit", day: "2-digit" },
-  };
+  const optionsByFormat: Record<DateFormatOption, Intl.DateTimeFormatOptions> =
+    {
+      "dd/mm/yyyy": { day: "2-digit", month: "2-digit", year: "numeric" },
+      "mm/dd/yyyy": { month: "2-digit", day: "2-digit", year: "numeric" },
+      "yyyy-mm-dd": { year: "numeric", month: "2-digit", day: "2-digit" },
+    };
 
   const baseOptions = optionsByFormat[dateFormat] ?? fallbackOptions;
   return new Intl.DateTimeFormat(locale, {

@@ -80,7 +80,8 @@ export async function POST(req: Request) {
     return Response.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "Failed to save receipt",
+        error:
+          error instanceof Error ? error.message : "Failed to save receipt",
       },
       { status: 400 },
     );

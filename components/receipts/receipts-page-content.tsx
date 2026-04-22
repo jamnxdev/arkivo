@@ -156,7 +156,10 @@ export function ReceiptsPageContent() {
     };
   }, [filteredReceipts]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredReceipts.length / ITEMS_PER_PAGE));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredReceipts.length / ITEMS_PER_PAGE),
+  );
   const pageStart = (currentPage - 1) * ITEMS_PER_PAGE;
   const pageEnd = pageStart + ITEMS_PER_PAGE;
   const paginatedReceipts = filteredReceipts.slice(pageStart, pageEnd);

@@ -10,13 +10,11 @@ export interface ReceiptContentInput {
   total: number | null;
   date: string | null;
   time: string | null;
-  items:
-    | Array<{
-        name: string;
-        price: number;
-        category?: string;
-      }>
-    | null;
+  items: Array<{
+    name: string;
+    price: number;
+    category?: string;
+  }> | null;
   tax: Record<string, number> | null;
 }
 
@@ -28,7 +26,9 @@ export interface ManualReceiptRequiredInput {
   category: string | null;
 }
 
-export function getManualReceiptMissingFields(input: ManualReceiptRequiredInput) {
+export function getManualReceiptMissingFields(
+  input: ManualReceiptRequiredInput,
+) {
   const missing: string[] = [];
 
   if (!hasText(input.merchant)) missing.push("merchant");
@@ -40,7 +40,9 @@ export function getManualReceiptMissingFields(input: ManualReceiptRequiredInput)
   return missing;
 }
 
-export function hasRequiredManualReceiptFields(input: ManualReceiptRequiredInput) {
+export function hasRequiredManualReceiptFields(
+  input: ManualReceiptRequiredInput,
+) {
   return getManualReceiptMissingFields(input).length === 0;
 }
 
@@ -48,9 +50,7 @@ export function hasMeaningfulReceiptContent(input: ReceiptContentInput) {
   const hasItems =
     input.items?.some(
       (item) =>
-        hasText(item.name) ||
-        hasText(item.category) ||
-        item.price !== 0,
+        hasText(item.name) || hasText(item.category) || item.price !== 0,
     ) ?? false;
 
   const hasTax =
@@ -124,10 +124,12 @@ const reviewedReceiptSaveBaseSchema = z
   })
   .strict();
 
-export type ReviewedReceiptSaveInput = z.infer<typeof reviewedReceiptSaveBaseSchema>;
+export type ReviewedReceiptSaveInput = z.infer<
+  typeof reviewedReceiptSaveBaseSchema
+>;
 
-export const reviewedReceiptSaveSchema = reviewedReceiptSaveBaseSchema.superRefine(
-  (input, context) => {
+export const reviewedReceiptSaveSchema =
+  reviewedReceiptSaveBaseSchema.superRefine((input, context) => {
     if (!hasMeaningfulReceiptContent(input)) {
       context.addIssue({
         code: "custom",
@@ -154,12 +156,13 @@ export const reviewedReceiptSaveSchema = reviewedReceiptSaveBaseSchema.superRefi
 
     if (
       input.cloudinaryPublicId === null &&
-      (input.total === null || !Number.isFinite(input.total) || input.total <= 0)
+      (input.total === null ||
+        !Number.isFinite(input.total) ||
+        input.total <= 0)
     ) {
       context.addIssue({
         code: "custom",
         message: "Manual receipt total must be greater than 0.",
       });
     }
-  },
-);
+  });

@@ -76,11 +76,7 @@ export function XAxis({ numTicks = 5, tickerHalfWidth = 50 }: XAxisProps) {
   const { xScale, margin, tooltipData, containerRef, width, height } =
     useChart();
   const isClient = useIsClient();
-  const portalRoot = useChartPortalRoot(
-    containerRef,
-    isClient,
-    width + height,
-  );
+  const portalRoot = useChartPortalRoot(containerRef, isClient, width + height);
 
   // Generate evenly spaced tick values, always including first and last dates
   const labelsToShow = useMemo(() => {
@@ -109,10 +105,14 @@ export function XAxis({ numTicks = 5, tickerHalfWidth = 50 }: XAxisProps) {
     return dates.map((date) => ({
       date,
       x: (xScale(date) ?? 0) + margin.left,
-      label: formatDateByPreference(date, {
-        month: "short",
-        day: "numeric",
-      }, { useDatePreset: false }),
+      label: formatDateByPreference(
+        date,
+        {
+          month: "short",
+          day: "numeric",
+        },
+        { useDatePreset: false },
+      ),
     }));
   }, [xScale, margin.left, numTicks]);
 

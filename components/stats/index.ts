@@ -12,11 +12,12 @@ export {
   formatMonthYear,
   formatShortDate,
 } from "./stats-format";
-export type { BreakdownRow, SpendingPoint, StatsAnalyticsData } from "./stats-mock-data";
-export {
-  buildStatsAnalyticsData,
-  STATS_VIEW_KEYS,
+export type {
+  BreakdownRow,
+  SpendingPoint,
+  StatsAnalyticsData,
 } from "./stats-mock-data";
+export { buildStatsAnalyticsData, STATS_VIEW_KEYS } from "./stats-mock-data";
 export { StatsPageHeader } from "./stats-page-header";
 export { StatsSectionCard } from "./stats-section-card";
 export type { ChartSpendingPoint } from "./stats-series";

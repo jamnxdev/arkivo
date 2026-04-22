@@ -37,11 +37,7 @@ export function YAxis({
 }: YAxisProps) {
   const { yScale, margin, containerRef, width, height } = useChart();
   const isClient = useIsClient();
-  const portalRoot = useChartPortalRoot(
-    containerRef,
-    isClient,
-    width + height,
-  );
+  const portalRoot = useChartPortalRoot(containerRef, isClient, width + height);
 
   const ticks = useMemo(() => {
     const tickValues: number[] = yScale.ticks(numTicks);

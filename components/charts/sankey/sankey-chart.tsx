@@ -112,17 +112,20 @@ function SankeyChartInner({
     return sankeyGenerator(clonedData);
   }, [data, sankeyGenerator]);
 
-  const createPath = useCallback((link: SankeyLink<SankeyNodeDatum, SankeyLinkDatum>) => {
-    try {
-      const pathGenerator = sankeyLinkHorizontal<
-        SankeyNodeDatum,
-        SankeyLinkDatum
-      >();
-      return pathGenerator(link) || "";
-    } catch {
-      return "";
-    }
-  }, []);
+  const createPath = useCallback(
+    (link: SankeyLink<SankeyNodeDatum, SankeyLinkDatum>) => {
+      try {
+        const pathGenerator = sankeyLinkHorizontal<
+          SankeyNodeDatum,
+          SankeyLinkDatum
+        >();
+        return pathGenerator(link) || "";
+      } catch {
+        return "";
+      }
+    },
+    [],
+  );
 
   const handleMouseMove = useCallback((event: React.MouseEvent) => {
     const point = localPoint(event);

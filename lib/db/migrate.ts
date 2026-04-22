@@ -5,7 +5,8 @@ import { migrate } from "drizzle-orm/neon-http/migrator";
 
 config({ path: ".env" });
 
-const migrationUrl = process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
+const migrationUrl =
+  process.env.MIGRATION_DATABASE_URL ?? process.env.DATABASE_URL;
 
 if (!migrationUrl) {
   throw new Error(

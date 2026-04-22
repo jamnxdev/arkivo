@@ -39,14 +39,7 @@ export function AreaSpendingTrendSection({
   const [mode, setMode] = useState<TrendAreaMode>("spending");
   const [visual, setVisual] = useState<AreaVisualMode>("soft");
   const chartData = useMemo(
-    () =>
-      buildOrderedTrendChart(
-        dailySpending,
-        range,
-        grain,
-        "asc",
-        todayIso,
-      ),
+    () => buildOrderedTrendChart(dailySpending, range, grain, "asc", todayIso),
     [dailySpending, grain, range, todayIso],
   );
 

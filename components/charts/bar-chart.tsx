@@ -165,10 +165,14 @@ function ChartInner({
     (d: Record<string, unknown>): string => {
       const value = d[xDataKey];
       if (value instanceof Date) {
-        return formatDateByPreference(value, {
-          month: "short",
-          day: "numeric",
-        }, { useDatePreset: false });
+        return formatDateByPreference(
+          value,
+          {
+            month: "short",
+            day: "numeric",
+          },
+          { useDatePreset: false },
+        );
       }
       return String(value ?? "");
     },

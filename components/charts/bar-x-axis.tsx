@@ -88,11 +88,7 @@ export function BarXAxis({
     height,
   } = useChart();
   const isClient = useIsClient();
-  const portalRoot = useChartPortalRoot(
-    containerRef,
-    isClient,
-    width + height,
-  );
+  const portalRoot = useChartPortalRoot(containerRef, isClient, width + height);
 
   // Generate labels for each bar
   const labelsToShow = useMemo(() => {

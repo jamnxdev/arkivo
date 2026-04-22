@@ -192,10 +192,14 @@ function ChartInner({
   const dateLabels = useMemo(
     () =>
       data.map((d) =>
-        formatDateByPreference(xAccessor(d), {
-          month: "short",
-          day: "numeric",
-        }, { useDatePreset: false }),
+        formatDateByPreference(
+          xAccessor(d),
+          {
+            month: "short",
+            day: "numeric",
+          },
+          { useDatePreset: false },
+        ),
       ),
     [data, xAccessor],
   );

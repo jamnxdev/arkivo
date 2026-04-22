@@ -166,9 +166,12 @@ export function Ring({
     if (!animate) {
       return;
     }
-    const timeout = setTimeout(() => {
-      setHasPlayedIntro(true);
-    }, (ringExpandDelay + 0.3) * 1000);
+    const timeout = setTimeout(
+      () => {
+        setHasPlayedIntro(true);
+      },
+      (ringExpandDelay + 0.3) * 1000,
+    );
     return () => clearTimeout(timeout);
   }, [animate, ringExpandDelay]);
 
