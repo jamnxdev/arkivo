@@ -18,7 +18,7 @@ export default function DashboardPage() {
         onReceiptSaved={() => setRefreshToken((current) => current + 1)}
       />
       <AnalyticsChartSection refreshToken={refreshToken} />
-      <ActionCenterSection />
+      <ActionCenterSection refreshToken={refreshToken} />
     </DashboardShell>
   );
 }
