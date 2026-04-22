@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 import { Grid } from "@/components/charts/grid";
@@ -14,7 +15,7 @@ interface AnalyticsChartSectionProps {
 }
 
 interface TimeSeriesPoint {
-  date: string;
+  date: string | null;
   total: number;
 }
 
@@ -32,15 +33,21 @@ export function AnalyticsChartSection({
   const chartData = useMemo(
     () =>
       points
-        .map((point) => ({
-          date: new Date(point.date).toLocaleDateString("en-GB", {
-            day: "2-digit",
-            month: "short",
-          }),
-          spending: Number(point.total) || 0,
-          rawDate: new Date(point.date).getTime(),
-        }))
-        .filter((point) => !Number.isNaN(point.rawDate))
+        .map((point) => {
+          const parsedDate = point.date ? new Date(point.date) : null;
+          const timestamp = parsedDate?.getTime() ?? Number.NaN;
+
+          return {
+            // Keep Date for chart scale/tooltip to avoid reparsing localized labels.
+            date: parsedDate,
+            spending: Number(point.total) || 0,
+            rawDate: timestamp,
+          };
+        })
+        .filter(
+          (point): point is { date: Date; spending: number; rawDate: number } =>
+            point.date instanceof Date && !Number.isNaN(point.rawDate),
+        )
         .sort((a, b) => a.rawDate - b.rawDate),
     [points],
   );
@@ -54,8 +61,8 @@ export function AnalyticsChartSection({
             Daily spending trend for the past 7 days
           </p>
         </div>
-        <Button size="sm" variant="outline">
-          View more
+        <Button asChild size="sm" variant="outline">
+          <Link href="/dashboard/stats">View more</Link>
         </Button>
       </div>
 

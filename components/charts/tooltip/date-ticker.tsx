@@ -12,15 +12,20 @@ export interface DateTickerProps {
 }
 
 export function DateTicker({ currentIndex, labels, visible }: DateTickerProps) {
+  const sanitizedLabels = useMemo(
+    () => labels.filter((label) => label.trim().toLowerCase() !== "invalid date"),
+    [labels],
+  );
+
   // Parse labels into month and day parts
   const parsedLabels = useMemo(() => {
-    return labels.map((label) => {
+    return sanitizedLabels.map((label) => {
       const parts = label.split(" ");
       const month = parts[0] || "";
       const day = parts[1] || "";
       return { month, day, full: label };
     });
-  }, [labels]);
+  }, [sanitizedLabels]);
 
   // Get unique months and their indices
   const monthIndices = useMemo(() => {
@@ -69,7 +74,7 @@ export function DateTicker({ currentIndex, labels, visible }: DateTickerProps) {
     }
   }, [currentMonthIndex, monthY]);
 
-  if (!visible || labels.length === 0) {
+  if (!visible || sanitizedLabels.length === 0) {
     return null;
   }
 

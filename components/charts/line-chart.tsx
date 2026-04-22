@@ -134,7 +134,15 @@ function ChartInner({
   const xAccessor = useCallback(
     (d: Record<string, unknown>): Date => {
       const value = d[xDataKey];
-      return value instanceof Date ? value : new Date(value as string | number);
+      if (value instanceof Date) {
+        return value;
+      }
+
+      if (typeof value === "string" || typeof value === "number") {
+        return new Date(value);
+      }
+
+      return new Date(Number.NaN);
     },
     [xDataKey],
   );
@@ -147,7 +155,18 @@ function ChartInner({
 
   // X scale (time) - use exact data domain for tight fit
   const xScale = useMemo(() => {
-    const dates = data.map((d) => xAccessor(d));
+    const dates = data
+      .map((d) => xAccessor(d))
+      .filter((date) => !Number.isNaN(date.getTime()));
+
+    if (dates.length === 0) {
+      const now = Date.now();
+      return scaleTime({
+        range: [0, innerWidth],
+        domain: [now - 24 * 60 * 60 * 1000, now],
+      });
+    }
+
     const minTime = Math.min(...dates.map((d) => d.getTime()));
     const maxTime = Math.max(...dates.map((d) => d.getTime()));
 
@@ -191,16 +210,20 @@ function ChartInner({
   // Pre-compute date labels for ticker animation
   const dateLabels = useMemo(
     () =>
-      data.map((d) =>
-        formatDateByPreference(
-          xAccessor(d),
-          {
-            month: "short",
-            day: "numeric",
-          },
-          { useDatePreset: false },
-        ),
-      ),
+      data
+        .map((d) => xAccessor(d))
+        .filter((date) => !Number.isNaN(date.getTime()))
+        .map((date) =>
+          formatDateByPreference(
+            date,
+            {
+              month: "short",
+              day: "numeric",
+            },
+            { useDatePreset: false },
+          ),
+        )
+        .filter((label) => label.trim().toLowerCase() !== "invalid date"),
     [data, xAccessor],
   );
 

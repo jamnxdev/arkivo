@@ -130,8 +130,13 @@ export function ChartTooltip({
       return barXAccessor(tooltipData.point);
     }
     // For line/area charts, use the date
-    return formatDateByPreference(
-      xAccessor(tooltipData.point),
+    const pointDate = xAccessor(tooltipData.point);
+    if (Number.isNaN(pointDate.getTime())) {
+      return undefined;
+    }
+
+    const formattedDate = formatDateByPreference(
+      pointDate,
       {
         weekday: "short",
         month: "short",
@@ -139,6 +144,11 @@ export function ChartTooltip({
       },
       { useDatePreset: false },
     );
+    if (formattedDate.trim().toLowerCase() === "invalid date") {
+      return undefined;
+    }
+
+    return formattedDate;
   }, [tooltipData, barXAccessor, xAccessor]);
 
   if (!(isClient && portalRoot)) {

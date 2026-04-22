@@ -90,6 +90,16 @@ export function XAxis({ numTicks = 5, tickerHalfWidth = 50 }: XAxisProps) {
 
     const startTime = startDate.getTime();
     const endTime = endDate.getTime();
+
+    if (
+      Number.isNaN(startTime) ||
+      Number.isNaN(endTime) ||
+      !Number.isFinite(startTime) ||
+      !Number.isFinite(endTime)
+    ) {
+      return [];
+    }
+
     const timeRange = endTime - startTime;
 
     // Create evenly spaced dates from start to end
