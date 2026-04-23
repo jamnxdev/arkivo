@@ -1,5 +1,7 @@
 "use client"
 
+import { DotsThreeOutlineIcon, FolderIcon, ShareIcon, TrashIcon } from "@phosphor-icons/react"
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -16,7 +18,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { DotsThreeOutlineIcon, FolderIcon, ShareIcon, TrashIcon } from "@phosphor-icons/react"
 
 export function NavDocuments({
   items,

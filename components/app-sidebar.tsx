@@ -1,5 +1,6 @@
 "use client"
 
+import { CameraIcon, ChartBarIcon, ChartLineIcon, CommandIcon,DatabaseIcon, FileIcon, FileTextIcon, FolderIcon, GearIcon, ListIcon, MagnifyingGlassIcon, QuestionIcon, SquaresFourIcon, UsersIcon } from "@phosphor-icons/react"
 import * as React from "react"
 
 import { NavDocuments } from "@/components/nav-documents"
@@ -15,7 +16,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { SquaresFourIcon, ListIcon, ChartBarIcon, FolderIcon, UsersIcon, CameraIcon, FileTextIcon, GearIcon, QuestionIcon, MagnifyingGlassIcon, DatabaseIcon, ChartLineIcon, FileIcon, CommandIcon } from "@phosphor-icons/react"
 
 const data = {
   user: {

@@ -1,5 +1,7 @@
 "use client"
 
+import { TrendDownIcon,TrendUpIcon } from "@phosphor-icons/react"
+
 import { Badge } from "@/components/ui/badge"
 import {
   Card,
@@ -9,7 +11,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { TrendUpIcon, TrendDownIcon } from "@phosphor-icons/react"
 
 export function SectionCards() {
   return (

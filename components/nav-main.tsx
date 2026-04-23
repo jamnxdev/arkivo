@@ -1,5 +1,7 @@
 "use client"
 
+import { EnvelopeIcon,PlusCircleIcon } from "@phosphor-icons/react"
+
 import { Button } from "@/components/ui/button"
 import {
   SidebarGroup,
@@ -8,7 +10,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
-import { PlusCircleIcon, EnvelopeIcon } from "@phosphor-icons/react"
 
 export function NavMain({
   items,

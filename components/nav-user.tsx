@@ -1,5 +1,7 @@
 "use client"
 
+import { BellIcon, CreditCardIcon, DotsThreeVerticalIcon, SignOutIcon,UserCircleIcon } from "@phosphor-icons/react"
+
 import {
   Avatar,
   AvatarFallback,
@@ -20,7 +22,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import { DotsThreeVerticalIcon, UserCircleIcon, CreditCardIcon, BellIcon, SignOutIcon } from "@phosphor-icons/react"
 
 export function NavUser({
   user,
