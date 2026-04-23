@@ -13,7 +13,8 @@ export interface DateTickerProps {
 
 export function DateTicker({ currentIndex, labels, visible }: DateTickerProps) {
   const sanitizedLabels = useMemo(
-    () => labels.filter((label) => label.trim().toLowerCase() !== "invalid date"),
+    () =>
+      labels.filter((label) => label.trim().toLowerCase() !== "invalid date"),
     [labels],
   );
 

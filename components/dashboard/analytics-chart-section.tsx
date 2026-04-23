@@ -61,7 +61,7 @@ export function AnalyticsChartSection({
             Daily spending trend for the past 7 days
           </p>
         </div>
-        <Button asChild size="sm" variant="outline">
+        <Button size="sm" variant="outline">
           <Link href="/dashboard/stats">View more</Link>
         </Button>
       </div>
