@@ -73,7 +73,7 @@ export function OverviewCards({ refreshToken = 0 }: OverviewCardsProps) {
   return (
     <section className="space-y-3">
       <h2 className="text-lg font-semibold">Overview</h2>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
         {OVERVIEW_METRICS.map((metric) => (
           <article key={metric.label} className="rounded-xl border bg-card p-4">
             <p className="text-xs text-muted-foreground">{metric.label}</p>

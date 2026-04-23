@@ -52,21 +52,37 @@ export default function DashboardStatsPage() {
 
   return (
     <DashboardShell>
-      <section className="space-y-4">
+      <section className="space-y-4 lg:space-y-6">
         <StatsPageHeader />
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
-        <div className="grid gap-4">
-          <DenseSpendingTrendSection
-            dailySpending={data.dailySpending}
-            todayIso={data.todayIso}
-          />
-          <AreaSpendingTrendSection
-            dailySpending={data.dailySpending}
-            todayIso={data.todayIso}
-          />
-          <SegmentBarSection breakdownByView={data.breakdownByView} />
-          <PieBreakdownSection breakdownByView={data.breakdownByView} />
-          <RingProgressSection breakdownByView={data.breakdownByView} />
+
+        <div className="hidden rounded-2xl border bg-card p-5 lg:block">
+          <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+            Insights
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Desktop view prioritizes trend charts and category distribution side
+            by side for faster analysis.
+          </p>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-12 lg:gap-6">
+          <div className="space-y-4 lg:col-span-8">
+            <DenseSpendingTrendSection
+              dailySpending={data.dailySpending}
+              todayIso={data.todayIso}
+            />
+            <AreaSpendingTrendSection
+              dailySpending={data.dailySpending}
+              todayIso={data.todayIso}
+            />
+            <SegmentBarSection breakdownByView={data.breakdownByView} />
+          </div>
+
+          <div className="space-y-4 lg:col-span-4">
+            <PieBreakdownSection breakdownByView={data.breakdownByView} />
+            <RingProgressSection breakdownByView={data.breakdownByView} />
+          </div>
         </div>
       </section>
     </DashboardShell>

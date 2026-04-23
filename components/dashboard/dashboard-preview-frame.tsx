@@ -16,7 +16,7 @@ export function DashboardPreviewFrame({
       className={`${
         isMobile
           ? `mx-auto w-full ${previewWidthClass} space-y-6 p-4 pb-24`
-          : "space-y-6 p-6 pb-6"
+          : "space-y-6"
       }`}
     >
       {children}
