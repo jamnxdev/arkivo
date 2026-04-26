@@ -156,6 +156,32 @@
   --chart-label: oklch(0.75 0.01 260);
 }
 
+@keyframes auth-carousel {
+  0%,
+  25% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  30%,
+  100% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes auth-dot {
+  0%,
+  25% {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+  30%,
+  100% {
+    opacity: 0.45;
+    transform: scaleX(0.35);
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
