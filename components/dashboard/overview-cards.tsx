@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { Skeleton } from "@/components/ui/skeleton";
+
 interface OverviewCardsProps {
   refreshToken?: number;
 }
@@ -19,14 +21,18 @@ interface CategoryPoint {
 export function OverviewCards({ refreshToken = 0 }: OverviewCardsProps) {
   const [summary, setSummary] = useState<SummaryResponse | null>(null);
   const [categories, setCategories] = useState<CategoryPoint[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/analytics/summary")
-      .then((res) => res.json())
-      .then((res) => setSummary(res.data));
-    fetch("/api/analytics/categories")
-      .then((res) => res.json())
-      .then((res) => setCategories(Array.isArray(res.data) ? res.data : []));
+    Promise.all([
+      fetch("/api/analytics/summary").then((res) => res.json()),
+      fetch("/api/analytics/categories").then((res) => res.json()),
+    ])
+      .then(([summaryRes, categoriesRes]) => {
+        setSummary(summaryRes.data);
+        setCategories(Array.isArray(categoriesRes.data) ? categoriesRes.data : []);
+      })
+      .finally(() => setIsLoading(false));
   }, [refreshToken]);
 
   const totalSpent = Number(summary?.total_spent ?? 0);
@@ -74,17 +80,28 @@ export function OverviewCards({ refreshToken = 0 }: OverviewCardsProps) {
     <section className="space-y-3">
       <h2 className="text-lg font-semibold">Overview</h2>
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
-        {OVERVIEW_METRICS.map((metric) => (
-          <article key={metric.label} className="rounded-xl border bg-card p-4">
-            <p className="text-xs text-muted-foreground">{metric.label}</p>
-            <p className="mt-2 text-xl font-semibold tracking-tight">
-              {metric.value}
-            </p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {metric.helper}
-            </p>
-          </article>
-        ))}
+        {isLoading
+          ? Array.from({ length: 4 }).map((_, index) => (
+              <article
+                key={`overview-skeleton-${index}`}
+                className="rounded-xl border bg-card p-4"
+              >
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="mt-2 h-7 w-24" />
+                <Skeleton className="mt-2 h-3 w-16" />
+              </article>
+            ))
+          : OVERVIEW_METRICS.map((metric) => (
+              <article key={metric.label} className="rounded-xl border bg-card p-4">
+                <p className="text-xs text-muted-foreground">{metric.label}</p>
+                <p className="mt-2 text-xl font-semibold tracking-tight">
+                  {metric.value}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {metric.helper}
+                </p>
+              </article>
+            ))}
       </div>
     </section>
   );

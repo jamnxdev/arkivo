@@ -9,6 +9,7 @@ import { LineChart } from "@/components/charts/line-chart";
 import { ChartTooltip } from "@/components/charts/tooltip/chart-tooltip";
 import { XAxis } from "@/components/charts/x-axis";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface AnalyticsChartSectionProps {
   refreshToken?: number;
@@ -23,11 +24,13 @@ export function AnalyticsChartSection({
   refreshToken = 0,
 }: AnalyticsChartSectionProps) {
   const [points, setPoints] = useState<TimeSeriesPoint[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/analytics/timeseries")
       .then((res) => res.json())
-      .then((res) => setPoints(Array.isArray(res.data) ? res.data : []));
+      .then((res) => setPoints(Array.isArray(res.data) ? res.data : []))
+      .finally(() => setIsLoading(false));
   }, [refreshToken]);
 
   const chartData = useMemo(
@@ -67,16 +70,23 @@ export function AnalyticsChartSection({
       </div>
 
       <div className="rounded-xl border bg-card p-4">
-        <LineChart
-          aspectRatio="16 / 9"
-          data={chartData}
-          margin={{ top: 20, right: 8, bottom: 36, left: 8 }}
-        >
-          <Grid horizontal numTicksRows={4} />
-          <Line dataKey="spending" />
-          <ChartTooltip />
-          <XAxis numTicks={4} />
-        </LineChart>
+        {isLoading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-4 w-36" />
+            <Skeleton className="h-[230px] w-full rounded-lg" />
+          </div>
+        ) : (
+          <LineChart
+            aspectRatio="16 / 9"
+            data={chartData}
+            margin={{ top: 20, right: 8, bottom: 36, left: 8 }}
+          >
+            <Grid horizontal numTicksRows={4} />
+            <Line dataKey="spending" />
+            <ChartTooltip />
+            <XAxis numTicks={4} />
+          </LineChart>
+        )}
       </div>
     </section>
   );

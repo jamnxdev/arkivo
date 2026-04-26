@@ -46,6 +46,7 @@ import {
   formatDateByPreference,
   getCurrencySymbolByPreference,
 } from "@/lib/settings/preferences";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 type ReceiptListItem = {
@@ -403,8 +404,25 @@ export function ReceiptsPageContent() {
       </div>
 
       {isLoading ? (
-        <div className="rounded-2xl border bg-card p-6 text-center text-sm text-muted-foreground">
-          Loading receipts...
+        <div className="space-y-3 rounded-2xl border bg-card p-4">
+          <Skeleton className="h-4 w-40" />
+          <div className="space-y-2">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div
+                key={`receipt-skeleton-${index}`}
+                className="grid gap-3 rounded-xl border border-border/60 bg-background/70 p-3 md:grid-cols-[minmax(220px,2fr)_minmax(140px,1fr)_minmax(110px,0.8fr)_minmax(140px,1fr)_120px] md:items-center"
+              >
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-24" />
+                <div className="flex justify-end gap-2">
+                  <Skeleton className="h-8 w-16" />
+                  <Skeleton className="h-8 w-16" />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : null}
 

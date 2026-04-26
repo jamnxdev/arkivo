@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface ActionCenterSectionProps {
   refreshToken?: number;
@@ -48,11 +49,16 @@ export function ActionCenterSection({
   refreshToken = 0,
 }: ActionCenterSectionProps) {
   const [receipts, setReceipts] = useState<ReceiptItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const hasLoadedOnceRef = useRef(false);
 
   useEffect(() => {
     let isMounted = true;
 
     const loadReceipts = async () => {
+      if (!hasLoadedOnceRef.current) {
+        setIsLoading(true);
+      }
       const response = await fetch("/api/receipts", { cache: "no-store" });
       const payload = await response.json();
 
@@ -75,6 +81,8 @@ export function ActionCenterSection({
         .slice(0, 3);
 
       setReceipts(recentRows);
+      hasLoadedOnceRef.current = true;
+      setIsLoading(false);
     };
 
     void loadReceipts();
@@ -110,7 +118,22 @@ export function ActionCenterSection({
       </div>
 
       <div className="space-y-2 rounded-xl border bg-card p-4">
-        {receipts.length > 0 ? (
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, index) => (
+            <article
+              key={`recent-receipt-skeleton-${index}`}
+              className="rounded-lg border border-border/70 bg-background/70 p-3"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-36" />
+                  <Skeleton className="h-3 w-28" />
+                </div>
+                <Skeleton className="h-5 w-20" />
+              </div>
+            </article>
+          ))
+        ) : receipts.length > 0 ? (
           receipts.map((receipt) => (
             <article
               key={receipt.id}
@@ -139,15 +162,22 @@ export function ActionCenterSection({
           </div>
         )}
 
-        <div className="flex items-center justify-between rounded-lg border border-dashed border-border/70 bg-background/60 p-3">
-          <p className="text-xs text-muted-foreground">
-            Total from latest receipts
-          </p>
-          <p className="text-sm font-semibold">
-            {/* TODO: Format with account currency once currency preferences are available. */}
-            ${totalRecentSpend.toFixed(2)}
-          </p>
-        </div>
+        {isLoading ? (
+          <div className="flex items-center justify-between rounded-lg border border-dashed border-border/70 bg-background/60 p-3">
+            <Skeleton className="h-3 w-36" />
+            <Skeleton className="h-5 w-20" />
+          </div>
+        ) : (
+          <div className="flex items-center justify-between rounded-lg border border-dashed border-border/70 bg-background/60 p-3">
+            <p className="text-xs text-muted-foreground">
+              Total from latest receipts
+            </p>
+            <p className="text-sm font-semibold">
+              {/* TODO: Format with account currency once currency preferences are available. */}
+              ${totalRecentSpend.toFixed(2)}
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

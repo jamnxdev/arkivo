@@ -11,6 +11,7 @@ import {
   SegmentBarSection,
 } from "@/components/stats";
 import { buildStatsAnalyticsData } from "@/components/stats/stats-mock-data";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type ReceiptApiItem = {
   total?: number | string | null;
@@ -22,9 +23,11 @@ type ReceiptApiItem = {
 
 export default function DashboardStatsPage() {
   const [data, setData] = useState(() => buildStatsAnalyticsData([]));
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    setIsLoading(true);
     fetch("/api/receipts")
       .then((res) => res.json())
       .then((payload) => {
@@ -46,7 +49,8 @@ export default function DashboardStatsPage() {
             ? fetchError.message
             : "Failed to load stats data",
         );
-      });
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   return (
@@ -66,20 +70,54 @@ export default function DashboardStatsPage() {
 
         <div className="grid gap-4 lg:grid-cols-12 lg:gap-6">
           <div className="space-y-4 lg:col-span-8">
-            <DenseSpendingTrendSection
-              dailySpending={data.dailySpending}
-              todayIso={data.todayIso}
-            />
-            <AreaSpendingTrendSection
-              dailySpending={data.dailySpending}
-              todayIso={data.todayIso}
-            />
-            <SegmentBarSection breakdownByView={data.breakdownByView} />
+            {isLoading ? (
+              <>
+                <div className="rounded-2xl border bg-card p-5">
+                  <Skeleton className="mb-3 h-5 w-40" />
+                  <Skeleton className="h-[220px] w-full rounded-lg" />
+                </div>
+                <div className="rounded-2xl border bg-card p-5">
+                  <Skeleton className="mb-3 h-5 w-44" />
+                  <Skeleton className="h-[220px] w-full rounded-lg" />
+                </div>
+                <div className="rounded-2xl border bg-card p-5">
+                  <Skeleton className="mb-3 h-5 w-36" />
+                  <Skeleton className="h-[120px] w-full rounded-lg" />
+                </div>
+              </>
+            ) : (
+              <>
+                <DenseSpendingTrendSection
+                  dailySpending={data.dailySpending}
+                  todayIso={data.todayIso}
+                />
+                <AreaSpendingTrendSection
+                  dailySpending={data.dailySpending}
+                  todayIso={data.todayIso}
+                />
+                <SegmentBarSection breakdownByView={data.breakdownByView} />
+              </>
+            )}
           </div>
 
           <div className="space-y-4 lg:col-span-4">
-            <PieBreakdownSection breakdownByView={data.breakdownByView} />
-            <RingProgressSection breakdownByView={data.breakdownByView} />
+            {isLoading ? (
+              <>
+                <div className="rounded-2xl border bg-card p-5">
+                  <Skeleton className="mb-3 h-5 w-32" />
+                  <Skeleton className="h-[220px] w-full rounded-lg" />
+                </div>
+                <div className="rounded-2xl border bg-card p-5">
+                  <Skeleton className="mb-3 h-5 w-40" />
+                  <Skeleton className="h-[160px] w-full rounded-lg" />
+                </div>
+              </>
+            ) : (
+              <>
+                <PieBreakdownSection breakdownByView={data.breakdownByView} />
+                <RingProgressSection breakdownByView={data.breakdownByView} />
+              </>
+            )}
           </div>
         </div>
       </section>

@@ -8,6 +8,7 @@ import * as React from "react";
 import { StatsSectionCard } from "@/components/stats/stats-section-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Select,
   SelectContent,
@@ -97,7 +98,16 @@ export function SettingsPageContent() {
           subtitle="Profile and security are managed by Clerk."
         >
           {!userLoaded ? (
-            <p className="text-sm text-muted-foreground">Loading account…</p>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-center gap-3">
+                <Skeleton className="size-12 shrink-0 rounded-full" />
+                <div className="min-w-0 space-y-2">
+                  <Skeleton className="h-4 w-36" />
+                  <Skeleton className="h-3 w-56 max-w-full" />
+                </div>
+              </div>
+              <Skeleton className="h-9 w-32 rounded-md" />
+            </div>
           ) : (
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex min-w-0 items-center gap-3">
