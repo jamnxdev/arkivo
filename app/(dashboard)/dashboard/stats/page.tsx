@@ -54,7 +54,7 @@ export default function DashboardStatsPage() {
       <section className="space-y-4 lg:space-y-6">
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
-        <div className="hidden rounded-2xl border bg-card p-5 lg:block">
+        <div className="rounded-2xl border bg-card p-5 lg:hidden">
           <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
             Insights
           </p>

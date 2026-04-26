@@ -9,5 +9,11 @@ export default async function Page() {
     redirect("/dashboard");
   }
 
-  return <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" />;
+  return (
+    <main className="min-h-svh bg-background">
+      <div className="mx-auto flex min-h-svh w-full max-w-5xl items-center justify-center px-6 py-16">
+        <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" />
+      </div>
+    </main>
+  );
 }
