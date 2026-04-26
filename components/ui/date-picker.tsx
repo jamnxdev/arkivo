@@ -16,10 +16,31 @@ type DatePickerProps = {
   className?: string;
 };
 
+function parseDateOnly(value?: string) {
+  if (!value) return null;
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return null;
+
+  const year = Number(match[1]);
+  const monthIndex = Number(match[2]) - 1;
+  const day = Number(match[3]);
+  const localDate = new Date(year, monthIndex, day);
+
+  return Number.isNaN(localDate.getTime()) ? null : localDate;
+}
+
+function formatDateOnly(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 function formatDate(value?: string) {
   if (!value) return null;
 
-  const parsedDate = new Date(value);
+  const parsedDate = parseDateOnly(value) ?? new Date(value);
   if (Number.isNaN(parsedDate.getTime())) return null;
 
   return new Intl.DateTimeFormat("en-GB", {
@@ -36,7 +57,7 @@ export function DatePicker({
   className,
 }: DatePickerProps) {
   const [open, setOpen] = React.useState(false);
-  const selectedDate = value ? new Date(value) : undefined;
+  const selectedDate = parseDateOnly(value) ?? undefined;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -55,12 +76,12 @@ export function DatePicker({
         <CalendarBlankIcon size={16} />
         {formatDate(value) ?? <span>{placeholder}</span>}
       </PopoverTrigger>
-      <PopoverContent className="z-[60] w-auto p-0">
+      <PopoverContent className="z-60 w-auto p-0">
         <Calendar
           mode="single"
           selected={selectedDate}
           onSelect={(date) => {
-            onChange?.(date.toISOString().slice(0, 10));
+            onChange?.(formatDateOnly(date));
             setOpen(false);
           }}
         />

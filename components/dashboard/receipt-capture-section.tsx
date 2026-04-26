@@ -838,10 +838,7 @@ export function ReceiptCaptureSection({
                   </div>
                   <div className="space-y-2">
                     {(draft.items ?? []).map((item, index) => (
-                      <div
-                        key={`${item.name}-${index}`}
-                        className="grid gap-2 sm:grid-cols-3"
-                      >
+                      <div key={index} className="grid gap-2 sm:grid-cols-3">
                         <Input
                           value={item.name}
                           placeholder="Item name"

@@ -13,6 +13,14 @@ function toReceiptDate(value: string | null) {
     return null;
   }
 
+  const dateOnlyMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (dateOnlyMatch) {
+    const year = Number(dateOnlyMatch[1]);
+    const monthIndex = Number(dateOnlyMatch[2]) - 1;
+    const day = Number(dateOnlyMatch[3]);
+    return new Date(Date.UTC(year, monthIndex, day, 12, 0, 0));
+  }
+
   const date = new Date(value);
 
   return Number.isNaN(date.getTime()) ? null : date;
