@@ -316,18 +316,6 @@ export function ReceiptsPageContent() {
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <p className="text-xs font-medium tracking-[0.16em] text-muted-foreground uppercase">
-          Receipts
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Receipt records
-        </h1>
-        <p className="text-sm text-muted-foreground">
-          Browse your real receipts with filters, sorting, and pagination.
-        </p>
-      </header>
-
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="rounded-2xl border bg-card p-4">
           <p className="text-sm text-muted-foreground">Total receipts</p>

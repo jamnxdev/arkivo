@@ -9,7 +9,6 @@ import {
   PieBreakdownSection,
   RingProgressSection,
   SegmentBarSection,
-  StatsPageHeader,
 } from "@/components/stats";
 import { buildStatsAnalyticsData } from "@/components/stats/stats-mock-data";
 
@@ -53,7 +52,6 @@ export default function DashboardStatsPage() {
   return (
     <DashboardShell>
       <section className="space-y-4 lg:space-y-6">
-        <StatsPageHeader />
         {error ? <p className="text-sm text-destructive">{error}</p> : null}
 
         <div className="hidden rounded-2xl border bg-card p-5 lg:block">

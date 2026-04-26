@@ -35,12 +35,14 @@ export function DashboardShell({ children }: DashboardShellProps) {
   const pathname = usePathname();
   const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
   const previewWidthClass = isTabletViewport ? "w-full" : "max-w-2xl";
-  const activeItemLabel =
-    dashboardNavItems.find((item) =>
-      item.href === "/dashboard"
-        ? pathname === item.href
-        : pathname.startsWith(item.href),
-    )?.label ?? "Dashboard";
+  const activeItem = dashboardNavItems.find((item) =>
+    item.href === "/dashboard"
+      ? pathname === item.href
+      : pathname.startsWith(item.href),
+  );
+  const activeItemLabel = activeItem?.label ?? "Dashboard";
+  const activeItemDescription =
+    activeItem?.description ?? "Review your dashboard overview and activity.";
 
   if (isTabletViewport) {
     return (
@@ -119,6 +121,9 @@ export function DashboardShell({ children }: DashboardShellProps) {
                 />
                 <h1 className="text-base font-medium">{activeItemLabel}</h1>
               </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {activeItemDescription}
+              </p>
             </header>
 
             <DashboardPreviewFrame

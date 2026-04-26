@@ -91,17 +91,6 @@ export function SettingsPageContent() {
 
   return (
     <section className="space-y-6">
-      <header className="space-y-2">
-        <p className="text-xs font-medium tracking-[0.16em] text-muted-foreground uppercase">
-          Settings
-        </p>
-        <h1 className="text-2xl font-semibold tracking-tight">Preferences</h1>
-        <p className="text-sm text-muted-foreground">
-          Account, appearance, and session. Data export and account deletion
-          will ship in a later release.
-        </p>
-      </header>
-
       <div className="grid gap-4">
         <StatsSectionCard
           title="Account"
