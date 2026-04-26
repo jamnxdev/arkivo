@@ -1,4 +1,9 @@
 import { getCurrentUser } from "@/lib/auth";
+import {
+  getCachedValue,
+  invalidateUserAnalyticsCache,
+  setCachedValue,
+} from "@/lib/cache/user-analytics-cache";
 import { createReceipt, getReceipts } from "@/lib/db/queries/receipts";
 import { setRlsUserContext } from "@/lib/db/rls";
 import { normalizeReceiptTotal } from "@/lib/receipts/normalize-total";
@@ -83,6 +88,7 @@ export async function POST(req: Request) {
       } catch {}
     }
 
+    invalidateUserAnalyticsCache(user.id);
     return Response.json({ success: true, data: receipt });
   } catch (error) {
     return Response.json(
@@ -104,7 +110,16 @@ export async function GET() {
   }
 
   await setRlsUserContext(user.id);
+  const cached = getCachedValue<Awaited<ReturnType<typeof getReceipts>>>(
+    user.id,
+    "receipts",
+  );
+  if (cached) {
+    return Response.json({ success: true, data: cached });
+  }
+
   const data = await getReceipts(user.id);
+  setCachedValue(user.id, "receipts", data);
 
   return Response.json({ success: true, data });
 }

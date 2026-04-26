@@ -1,4 +1,5 @@
 import { getCurrentUser } from "@/lib/auth";
+import { invalidateUserAnalyticsCache } from "@/lib/cache/user-analytics-cache";
 import { deleteReceipt, updateReceipt } from "@/lib/db/queries/receipts";
 import { setRlsUserContext } from "@/lib/db/rls";
 import { receiptUpdateSchema } from "@/lib/validators";
@@ -48,6 +49,7 @@ export async function PATCH(req: Request, context: RouteParams) {
     };
 
     const updated = await updateReceipt(id, updateData);
+    invalidateUserAnalyticsCache(user.id);
 
     return Response.json({ success: true, data: updated });
   } catch (error) {
@@ -73,6 +75,7 @@ export async function DELETE(req: Request, context: RouteParams) {
   const { id } = await context.params;
 
   await deleteReceipt(id);
+  invalidateUserAnalyticsCache(user.id);
 
   return Response.json({ success: true });
 }
