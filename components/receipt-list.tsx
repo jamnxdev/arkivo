@@ -34,7 +34,6 @@ export function ReceiptList({ refreshToken = 0 }: ReceiptListProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
     fetch("/api/receipts")
       .then((res) => res.json())
       .then((res) => setData(Array.isArray(res.data) ? res.data : []))

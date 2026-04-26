@@ -62,6 +62,8 @@ export interface LineChartProps {
 }
 
 const DEFAULT_MARGIN: Margin = { top: 40, right: 40, bottom: 40, left: 40 };
+const EMPTY_DOMAIN_WINDOW_MS = 24 * 60 * 60 * 1000;
+const FALLBACK_TIME_DOMAIN_END = Date.now();
 
 // Extract line configs from children synchronously to avoid render timing issues
 function extractLineConfigs(children: ReactNode): LineConfig[] {
@@ -160,10 +162,12 @@ function ChartInner({
       .filter((date) => !Number.isNaN(date.getTime()));
 
     if (dates.length === 0) {
-      const now = Date.now();
       return scaleTime({
         range: [0, innerWidth],
-        domain: [now - 24 * 60 * 60 * 1000, now],
+        domain: [
+          FALLBACK_TIME_DOMAIN_END - EMPTY_DOMAIN_WINDOW_MS,
+          FALLBACK_TIME_DOMAIN_END,
+        ],
       });
     }
 

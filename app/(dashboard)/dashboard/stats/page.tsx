@@ -27,7 +27,6 @@ export default function DashboardStatsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsLoading(true);
     fetch("/api/receipts")
       .then((res) => res.json())
       .then((payload) => {

@@ -18,7 +18,6 @@ export function AnalyticsCards({ refreshToken = 0 }: AnalyticsCardsProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
     fetch("/api/analytics/summary")
       .then((res) => res.json())
       .then((res) => setData(res.data))
@@ -29,7 +28,10 @@ export function AnalyticsCards({ refreshToken = 0 }: AnalyticsCardsProps) {
     return (
       <div className="grid grid-cols-2 gap-4">
         {Array.from({ length: 2 }).map((_, index) => (
-          <div key={`analytics-card-skeleton-${index}`} className="rounded border p-4">
+          <div
+            key={`analytics-card-skeleton-${index}`}
+            className="rounded border p-4"
+          >
             <Skeleton className="h-4 w-20" />
             <Skeleton className="mt-2 h-7 w-24" />
           </div>

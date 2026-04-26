@@ -19,7 +19,6 @@ export function Charts({ refreshToken = 0 }: ChartsProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    setIsLoading(true);
     fetch("/api/analytics/timeseries")
       .then((res) => res.json())
       .then((res) => setData(Array.isArray(res.data) ? res.data : []))
