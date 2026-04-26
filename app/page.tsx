@@ -1,16 +1,15 @@
 import { auth } from "@clerk/nextjs/server";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 
-export default function Page() {
-  return <LandingContent />;
-}
-
-async function LandingContent() {
+export default async function Page() {
   const { userId } = await auth();
-  const getStartedHref = userId ? "/dashboard" : "/sign-up";
-  const signInHref = userId ? "/dashboard" : "/sign-in";
+
+  if (userId) {
+    redirect("/dashboard");
+  }
 
   return (
     <main className="min-h-svh bg-background">
@@ -31,10 +30,10 @@ async function LandingContent() {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link href={getStartedHref}>
+            <Link href="/sign-up">
               <Button>Get started</Button>
             </Link>
-            <Link href={signInHref}>
+            <Link href="/sign-in">
               <Button variant="outline">Sign in</Button>
             </Link>
           </div>
