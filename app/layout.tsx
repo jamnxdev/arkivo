@@ -1,10 +1,10 @@
 import "./globals.css";
 
 import { ClerkProvider } from "@clerk/nextjs";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
 import { ThemeProvider } from "@/components/theme-provider";
-import { cn } from "@/lib/utils";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -16,6 +16,54 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 });
 
+// TODO: Update this URL to your production domain before release.
+const siteUrl =
+  process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+
+export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Arkivo",
+    template: "%s | Arkivo",
+  },
+  description: "AI-powered document and receipt tracking system.",
+  keywords: ["Arkivo", "receipt tracking", "expense tracking", "document management", "AI"],
+  alternates: {
+    canonical: "/",
+  },
+  manifest: "/manifest.webmanifest",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/icons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: ["/favicon.ico"],
+  },
+  openGraph: {
+    type: "website",
+    siteName: "Arkivo",
+    title: "Arkivo",
+    description: "AI-powered document and receipt tracking system.",
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Arkivo",
+    description: "AI-powered document and receipt tracking system.",
+  },
+  category: "productivity",
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -25,12 +73,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(
-        "antialiased",
-        fontMono.variable,
-        "font-sans",
-        geist.variable,
-      )}
+      className={`antialiased font-sans ${geist.variable} ${fontMono.variable}`}
     >
       <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
         <body>
