@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
+import { PwaRegister } from "@/components/pwa-register";
 import { ThemeProvider } from "@/components/theme-provider";
 
 const geist = Geist({
@@ -77,6 +78,7 @@ export default function RootLayout({
     >
       <ClerkProvider signInUrl="/sign-in" signUpUrl="/sign-up">
         <body>
+          <PwaRegister />
           <ThemeProvider>{children}</ThemeProvider>
         </body>
       </ClerkProvider>

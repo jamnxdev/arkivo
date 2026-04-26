@@ -5,8 +5,12 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Arkivo",
     short_name: "Arkivo",
     description: "AI-powered document and receipt tracking system.",
+    id: "/",
+    scope: "/",
     start_url: "/",
     display: "standalone",
+    display_override: ["standalone", "minimal-ui"],
+    orientation: "portrait",
     background_color: "#ffffff",
     theme_color: "#0a0a0a",
     icons: [
