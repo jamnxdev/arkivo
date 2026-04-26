@@ -166,3 +166,29 @@ export const reviewedReceiptSaveSchema =
       });
     }
   });
+
+export const receiptUpdateSchema = z
+  .object({
+    merchant: z.string().nullable().optional(),
+    merchantBrand: z.string().nullable().optional(),
+    total: z.number().finite().positive().nullable().optional(),
+    currency: z.string().nullable().optional(),
+    date: z.string().nullable().optional(),
+    time: z.string().nullable().optional(),
+    category: z.string().nullable().optional(),
+    items: z
+      .array(
+        z.object({
+          name: z.string(),
+          price: z.number(),
+          category: z.string().optional(),
+        }),
+      )
+      .nullable()
+      .optional(),
+    tax: z.record(z.number()).nullable().optional(),
+    metadata: z.record(z.any()).nullable().optional(),
+  })
+  .strict();
+
+export type ReceiptUpdateInput = z.infer<typeof receiptUpdateSchema>;

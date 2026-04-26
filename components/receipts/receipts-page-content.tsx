@@ -6,13 +6,33 @@ import {
   CaretRightIcon,
   FunnelSimpleIcon,
   MagnifyingGlassIcon,
+  PencilSimpleIcon,
   StorefrontIcon,
+  TrashIcon,
 } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -32,8 +52,19 @@ type ReceiptListItem = {
   id: string;
   merchant: string | null;
   total: string | number | null;
+  currency: string | null;
   date: string | null;
+  time: string | null;
   category: string | null;
+};
+
+type EditableReceiptForm = {
+  merchant: string;
+  total: string;
+  currency: string;
+  date: string;
+  time: string;
+  category: string;
 };
 
 const ITEMS_PER_PAGE = 10;
@@ -67,28 +98,137 @@ export function ReceiptsPageContent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [categoryFilter, setCategoryFilter] = useState("all-categories");
   const [sortBy, setSortBy] = useState("newest-first");
+  const [editingReceiptId, setEditingReceiptId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<EditableReceiptForm | null>(null);
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+  const [pendingDeleteReceipt, setPendingDeleteReceipt] =
+    useState<ReceiptListItem | null>(null);
+  const [isDeletingReceiptId, setIsDeletingReceiptId] = useState<string | null>(
+    null,
+  );
+  const [actionError, setActionError] = useState<string | null>(null);
   const currencySymbol = getCurrencySymbolByPreference() || "€";
 
-  useEffect(() => {
-    fetch("/api/receipts")
-      .then((res) => res.json())
-      .then((payload) => {
-        if (!payload.success) {
-          throw new Error(payload.error || "Failed to load receipts");
-        }
+  const loadReceipts = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/receipts");
+      const payload = await response.json();
+      if (!payload.success) {
+        throw new Error(payload.error || "Failed to load receipts");
+      }
+      setReceipts(Array.isArray(payload.data) ? payload.data : []);
+      setError(null);
+    } catch (fetchError: unknown) {
+      setError(
+        fetchError instanceof Error
+          ? fetchError.message
+          : "Failed to load receipts",
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-        setReceipts(Array.isArray(payload.data) ? payload.data : []);
-        setError(null);
-      })
-      .catch((fetchError: unknown) => {
-        setError(
-          fetchError instanceof Error
-            ? fetchError.message
-            : "Failed to load receipts",
-        );
-      })
-      .finally(() => setIsLoading(false));
+  useEffect(() => {
+    void loadReceipts();
   }, []);
+
+  const resetEditDialog = () => {
+    setEditingReceiptId(null);
+    setEditForm(null);
+    setActionError(null);
+    setIsSavingEdit(false);
+  };
+
+  const openEditDialog = (receipt: ReceiptListItem) => {
+    setEditingReceiptId(receipt.id);
+    setActionError(null);
+    setEditForm({
+      merchant: receipt.merchant ?? "",
+      total:
+        receipt.total === null || receipt.total === undefined
+          ? ""
+          : String(receipt.total),
+      currency: receipt.currency ?? "EUR",
+      date: receipt.date?.slice(0, 10) ?? "",
+      time: receipt.time ?? "",
+      category: receipt.category ?? "",
+    });
+  };
+
+  const saveReceiptChanges = async () => {
+    if (!editingReceiptId || !editForm) return;
+
+    const parsedTotal = editForm.total.trim();
+    const totalValue =
+      parsedTotal.length === 0 ? null : Number.parseFloat(parsedTotal);
+    if (totalValue !== null && Number.isNaN(totalValue)) {
+      setActionError("Total must be a valid number.");
+      return;
+    }
+
+    setIsSavingEdit(true);
+    setActionError(null);
+
+    try {
+      const response = await fetch(`/api/receipts/${editingReceiptId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          merchant: editForm.merchant.trim() || null,
+          total: totalValue,
+          currency: editForm.currency.trim() || null,
+          date: editForm.date || null,
+          time: editForm.time.trim() || null,
+          category: editForm.category.trim() || null,
+        }),
+      });
+
+      const payload = await response.json();
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error || "Failed to update receipt");
+      }
+
+      await loadReceipts();
+      resetEditDialog();
+    } catch (updateError: unknown) {
+      setActionError(
+        updateError instanceof Error
+          ? updateError.message
+          : "Failed to update receipt",
+      );
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const deleteReceiptById = async (receiptId: string) => {
+    setActionError(null);
+    setIsDeletingReceiptId(receiptId);
+
+    try {
+      const response = await fetch(`/api/receipts/${receiptId}`, {
+        method: "DELETE",
+      });
+      const payload = await response.json();
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error || "Failed to delete receipt");
+      }
+      await loadReceipts();
+    } catch (deleteError: unknown) {
+      setActionError(
+        deleteError instanceof Error
+          ? deleteError.message
+          : "Failed to delete receipt",
+      );
+    } finally {
+      setIsDeletingReceiptId(null);
+      setPendingDeleteReceipt(null);
+    }
+  };
 
   const categoryOptions = useMemo(() => {
     const categories = new Set<string>();
@@ -344,9 +484,27 @@ export function ReceiptsPageContent() {
                   </p>
 
                   <div className="md:justify-self-end">
-                    <Button variant="outline" size="sm" disabled>
-                      Edit soon
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => openEditDialog(receipt)}
+                      >
+                        <PencilSimpleIcon size={14} />
+                        Edit
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={isDeletingReceiptId === receipt.id}
+                        onClick={() => setPendingDeleteReceipt(receipt)}
+                      >
+                        <TrashIcon size={14} />
+                        {isDeletingReceiptId === receipt.id
+                          ? "Deleting..."
+                          : "Delete"}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </li>
@@ -400,6 +558,144 @@ export function ReceiptsPageContent() {
           </footer>
         </div>
       ) : null}
+
+      <Dialog
+        open={Boolean(editingReceiptId && editForm)}
+        onOpenChange={(open) => {
+          if (!open) {
+            resetEditDialog();
+          }
+        }}
+      >
+        <DialogContent showCloseButton={!isSavingEdit}>
+          <DialogHeader>
+            <DialogTitle>Edit receipt</DialogTitle>
+            <DialogDescription>
+              Update receipt details and save your changes.
+            </DialogDescription>
+          </DialogHeader>
+
+          {editForm ? (
+            <div className="space-y-3">
+              <Input
+                value={editForm.merchant}
+                onChange={(event) =>
+                  setEditForm((prev) =>
+                    prev ? { ...prev, merchant: event.target.value } : prev,
+                  )
+                }
+                placeholder="Merchant"
+              />
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={editForm.total}
+                  onChange={(event) =>
+                    setEditForm((prev) =>
+                      prev ? { ...prev, total: event.target.value } : prev,
+                    )
+                  }
+                  placeholder="Total"
+                />
+                <Input
+                  value={editForm.currency}
+                  onChange={(event) =>
+                    setEditForm((prev) =>
+                      prev ? { ...prev, currency: event.target.value } : prev,
+                    )
+                  }
+                  placeholder="Currency"
+                />
+              </div>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <DatePicker
+                  value={editForm.date}
+                  onChange={(value) =>
+                    setEditForm((prev) =>
+                      prev ? { ...prev, date: value } : prev,
+                    )
+                  }
+                />
+                <Input
+                  type="time"
+                  value={editForm.time}
+                  onChange={(event) =>
+                    setEditForm((prev) =>
+                      prev ? { ...prev, time: event.target.value } : prev,
+                    )
+                  }
+                  placeholder="Time"
+                />
+              </div>
+              <Input
+                value={editForm.category}
+                onChange={(event) =>
+                  setEditForm((prev) =>
+                    prev ? { ...prev, category: event.target.value } : prev,
+                  )
+                }
+                placeholder="Category"
+              />
+            </div>
+          ) : null}
+
+          {actionError ? (
+            <p className="text-sm text-destructive">{actionError}</p>
+          ) : null}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={resetEditDialog}
+              disabled={isSavingEdit}
+            >
+              Cancel
+            </Button>
+            <Button onClick={() => void saveReceiptChanges()} disabled={isSavingEdit}>
+              {isSavingEdit ? "Saving..." : "Save changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog
+        open={Boolean(pendingDeleteReceipt)}
+        onOpenChange={(open) => {
+          if (!open && !isDeletingReceiptId) {
+            setPendingDeleteReceipt(null);
+          }
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete receipt?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove{" "}
+              {pendingDeleteReceipt?.merchant ?? "this receipt"}. This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className={buttonVariants({ variant: "outline" })}
+              disabled={Boolean(isDeletingReceiptId)}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              className={buttonVariants({ variant: "destructive" })}
+              disabled={!pendingDeleteReceipt || Boolean(isDeletingReceiptId)}
+              onClick={() => {
+                if (!pendingDeleteReceipt) return;
+                void deleteReceiptById(pendingDeleteReceipt.id);
+              }}
+            >
+              {isDeletingReceiptId ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
