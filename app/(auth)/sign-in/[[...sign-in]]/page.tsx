@@ -83,7 +83,13 @@ export default async function Page() {
             </div>
 
             <div className="flex justify-center lg:justify-start">
-              <SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" />
+              <SignIn
+                routing="path"
+                path="/sign-in"
+                signUpUrl="/sign-up"
+                fallbackRedirectUrl="/dashboard"
+                forceRedirectUrl="/dashboard"
+              />
             </div>
         </section>
       </div>
