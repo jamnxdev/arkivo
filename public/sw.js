@@ -1,5 +1,5 @@
 // TODO: Bump this cache version whenever caching rules or critical assets change.
-const CACHE_NAME = "arkivo-pwa-v1";
+const CACHE_NAME = "arkivo-pwa-v2";
 const OFFLINE_URL = "/offline";
 
 // TODO: Extend this list if you add more shell-critical static assets.
@@ -49,6 +49,12 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(
       fetch(request).catch(() => caches.match(OFFLINE_URL)),
     );
+    return;
+  }
+
+  if (url.pathname.startsWith("/api/")) {
+    // TODO: Add endpoint-level strategy if offline API behavior is needed later.
+    event.respondWith(fetch(request));
     return;
   }
 

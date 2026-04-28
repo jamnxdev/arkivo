@@ -1,8 +1,6 @@
 import { getCurrentUser } from "@/lib/auth";
 import {
-  getCachedValue,
   invalidateUserAnalyticsCache,
-  setCachedValue,
 } from "@/lib/cache/user-analytics-cache";
 import { createReceipt, getReceipts } from "@/lib/db/queries/receipts";
 import { setRlsUserContext } from "@/lib/db/rls";
@@ -110,16 +108,10 @@ export async function GET() {
   }
 
   await setRlsUserContext(user.id);
-  const cached = getCachedValue<Awaited<ReturnType<typeof getReceipts>>>(
-    user.id,
-    "receipts",
-  );
-  if (cached) {
-    return Response.json({ success: true, data: cached });
-  }
-
   const data = await getReceipts(user.id);
-  setCachedValue(user.id, "receipts", data);
-
-  return Response.json({ success: true, data });
+  // TODO: Reintroduce receipts cache after all write paths guarantee invalidation.
+  return Response.json(
+    { success: true, data },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }

@@ -27,7 +27,7 @@ export default function DashboardStatsPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/receipts")
+    fetch("/api/receipts", { cache: "no-store" })
       .then((res) => res.json())
       .then((payload) => {
         if (!payload.success) {
