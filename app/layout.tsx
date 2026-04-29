@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import { PwaRegister } from "@/components/pwa-register";
 import { ThemeProvider } from "@/components/theme-provider";
+import { getSiteUrl } from "@/lib/utils";
 
 const geist = Geist({
   subsets: ["latin"],
@@ -17,9 +18,7 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 });
 
-// TODO: Update this URL to your production domain before release.
-const siteUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+const siteUrl = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

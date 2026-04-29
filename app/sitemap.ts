@@ -1,8 +1,8 @@
 import type { MetadataRoute } from "next";
 
-// TODO: Update this URL to your production domain before release.
-const siteUrl =
-  process.env.NEXT_PUBLIC_APP_URL ?? process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+import { getSiteUrl } from "@/lib/utils";
+
+const siteUrl = getSiteUrl();
 
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
