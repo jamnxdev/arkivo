@@ -59,7 +59,7 @@ export function ActionCenterSection({
       if (!hasLoadedOnceRef.current) {
         setIsLoading(true);
       }
-      const response = await fetch("/api/receipts", { cache: "no-store" });
+      const response = await fetch("/api/receipts");
       const payload = await response.json();
 
       if (!isMounted) {
