@@ -23,6 +23,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { DatePicker } from "@/components/ui/date-picker";
 import {
@@ -41,12 +42,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   formatCurrencyByPreference,
   formatDateByPreference,
   getCurrencySymbolByPreference,
 } from "@/lib/settings/preferences";
-import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 
 type ReceiptListItem = {
@@ -296,6 +297,16 @@ export function ReceiptsPageContent() {
       totalSpend,
     };
   }, [filteredReceipts]);
+  const hasActiveFilters =
+    searchValue.trim().length > 0 ||
+    selectedDate.trim().length > 0 ||
+    categoryFilter !== "all-categories" ||
+    sortBy !== "newest-first";
+  const activeFilterCount =
+    Number(searchValue.trim().length > 0) +
+    Number(selectedDate.trim().length > 0) +
+    Number(categoryFilter !== "all-categories") +
+    Number(sortBy !== "newest-first");
 
   const totalPages = Math.max(
     1,
@@ -336,60 +347,94 @@ export function ReceiptsPageContent() {
         </div>
       </div>
 
-      <div className="rounded-2xl border bg-card p-4">
-        <div className="mb-3 flex items-center gap-2 text-sm font-medium">
-          <FunnelSimpleIcon size={16} />
-          List controls
+      <div className="rounded-2xl border bg-card p-4 sm:p-5">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <FunnelSimpleIcon size={16} className="text-muted-foreground" />
+            <span>Filter receipts</span>
+          </div>
+          <div className="flex items-center gap-2 pb-2">
+            <Badge variant={hasActiveFilters ? "secondary" : "outline"}>
+              {hasActiveFilters
+                ? `${activeFilterCount} active filter${activeFilterCount === 1 ? "" : "s"}`
+                : "No active filters"}
+            </Badge>
+          </div>
         </div>
-        <div className="space-y-3">
-          <label className="relative block">
-            <MagnifyingGlassIcon
-              size={18}
-              className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground"
-            />
-            <Input
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-              placeholder="Search merchant or item"
-              className="rounded-xl pr-4 pl-11 text-base"
-            />
-          </label>
-          <div className="grid gap-3 lg:grid-cols-[1fr_1fr_1fr_auto]">
-            <DatePicker value={selectedDate} onChange={setSelectedDate} />
-            <Select
-              value={categoryFilter}
-              onValueChange={(value) => setCategoryFilter(String(value ?? ""))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All categories" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-categories">All categories</SelectItem>
-                {categoryOptions.map((category) => (
-                  <SelectItem key={category} value={category}>
-                    {category}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select
-              value={sortBy}
-              onValueChange={(value) => setSortBy(String(value ?? ""))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Newest first" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="newest-first">Newest first</SelectItem>
-                <SelectItem value="oldest-first">Oldest first</SelectItem>
-                <SelectItem value="highest-amount">Highest amount</SelectItem>
-                <SelectItem value="lowest-amount">Lowest amount</SelectItem>
-              </SelectContent>
-            </Select>
+        <div className="rounded-xl border bg-muted/30 p-3 sm:p-4">
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-12">
+            <div className="space-y-1 md:col-span-2 xl:col-span-5">
+              <p className="text-xs font-medium text-muted-foreground">
+                Search
+              </p>
+              <label className="relative block">
+                <MagnifyingGlassIcon
+                  size={18}
+                  className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-muted-foreground"
+                />
+                <Input
+                  value={searchValue}
+                  onChange={(event) => setSearchValue(event.target.value)}
+                  placeholder="Merchant or category"
+                  className="h-10 rounded-lg pr-4 pl-11 text-sm"
+                />
+              </label>
+            </div>
+            <div className="space-y-1 md:col-span-1 xl:col-span-3">
+              <p className="text-xs font-medium text-muted-foreground">Date</p>
+              <DatePicker
+                value={selectedDate}
+                onChange={setSelectedDate}
+                className="h-10 rounded-lg border-transparent bg-input/50"
+              />
+            </div>
+            <div className="space-y-1 md:col-span-1 xl:col-span-2">
+              <p className="text-xs font-medium text-muted-foreground">
+                Category
+              </p>
+              <Select
+                value={categoryFilter}
+                onValueChange={(value) =>
+                  setCategoryFilter(String(value ?? ""))
+                }
+              >
+                <SelectTrigger className="h-10 w-full rounded-lg">
+                  <SelectValue placeholder="All categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all-categories">All categories</SelectItem>
+                  {categoryOptions.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1 md:col-span-1 xl:col-span-2">
+              <p className="text-xs font-medium text-muted-foreground">Sort</p>
+              <Select
+                value={sortBy}
+                onValueChange={(value) => setSortBy(String(value ?? ""))}
+              >
+                <SelectTrigger className="h-10 w-full rounded-lg">
+                  <SelectValue placeholder="Newest first" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="newest-first">Newest first</SelectItem>
+                  <SelectItem value="oldest-first">Oldest first</SelectItem>
+                  <SelectItem value="highest-amount">Highest amount</SelectItem>
+                  <SelectItem value="lowest-amount">Lowest amount</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <div className="mt-3 flex justify-end">
             <Button
               variant="outline"
               size="sm"
-              className="justify-self-start lg:justify-self-end"
+              className="w-full sm:w-auto"
+              disabled={!hasActiveFilters}
               onClick={() => {
                 setSearchValue("");
                 setSelectedDate("");
@@ -397,7 +442,7 @@ export function ReceiptsPageContent() {
                 setSortBy("newest-first");
               }}
             >
-              Reset
+              Reset all
             </Button>
           </div>
         </div>
@@ -658,7 +703,10 @@ export function ReceiptsPageContent() {
             >
               Cancel
             </Button>
-            <Button onClick={() => void saveReceiptChanges()} disabled={isSavingEdit}>
+            <Button
+              onClick={() => void saveReceiptChanges()}
+              disabled={isSavingEdit}
+            >
               {isSavingEdit ? "Saving..." : "Save changes"}
             </Button>
           </DialogFooter>
