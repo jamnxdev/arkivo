@@ -34,7 +34,7 @@ export async function extractReceiptFromImage(input: {
   filename?: string;
 }) {
   const result = await generateText({
-    model: google("gemini-3.1-flash-lite-preview"),
+    model: google("gemini-3.5-flash"),
     output: Output.object({ schema: receiptExtractionSchema }),
     messages: [
       {
