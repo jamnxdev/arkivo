@@ -7,6 +7,7 @@ import {
   FunnelSimpleIcon,
   MagnifyingGlassIcon,
   PencilSimpleIcon,
+  PlusIcon,
   StorefrontIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
@@ -53,11 +54,19 @@ import { cn } from "@/lib/utils";
 type ReceiptListItem = {
   id: string;
   merchant: string | null;
+  merchantBrand: string | null;
   total: string | number | null;
   currency: string | null;
   date: string | null;
   time: string | null;
   category: string | null;
+  items: ReceiptItem[] | null;
+};
+
+type ReceiptItem = {
+  name: string;
+  price: number;
+  category?: string;
 };
 
 type EditableReceiptForm = {
@@ -67,6 +76,11 @@ type EditableReceiptForm = {
   date: string;
   time: string;
   category: string;
+  items: Array<{
+    name: string;
+    price: string;
+    category: string;
+  }>;
 };
 
 const ITEMS_PER_PAGE = 10;
@@ -89,6 +103,65 @@ function formatAmount(value: string | number | null) {
   if (numericValue == null || Number.isNaN(numericValue)) return "N/A";
 
   return formatCurrencyByPreference(numericValue);
+}
+
+function normalizeReceiptItem(value: unknown): ReceiptItem | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const item = value as { name?: unknown; price?: unknown; category?: unknown };
+  const numericPrice =
+    typeof item.price === "number"
+      ? item.price
+      : typeof item.price === "string"
+        ? Number.parseFloat(item.price)
+        : 0;
+
+  return {
+    name: typeof item.name === "string" ? item.name : "",
+    price: Number.isFinite(numericPrice) ? numericPrice : 0,
+    category: typeof item.category === "string" ? item.category : undefined,
+  };
+}
+
+function isReceiptItem(value: ReceiptItem | null): value is ReceiptItem {
+  return value !== null;
+}
+
+function isReceiptListItem(
+  value: ReceiptListItem | null,
+): value is ReceiptListItem {
+  return value !== null;
+}
+
+function normalizeReceipt(value: unknown): ReceiptListItem | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const receipt = value as Partial<
+    Omit<ReceiptListItem, "items"> & { items?: unknown }
+  >;
+  const items = Array.isArray(receipt.items)
+    ? receipt.items.map(normalizeReceiptItem).filter(isReceiptItem)
+    : null;
+
+  if (typeof receipt.id !== "string") {
+    return null;
+  }
+
+  return {
+    id: receipt.id,
+    merchant: receipt.merchant ?? null,
+    merchantBrand: receipt.merchantBrand ?? null,
+    total: receipt.total ?? null,
+    currency: receipt.currency ?? null,
+    date: receipt.date ?? null,
+    time: receipt.time ?? null,
+    category: receipt.category ?? null,
+    items,
+  };
 }
 
 export function ReceiptsPageContent() {
@@ -119,7 +192,11 @@ export function ReceiptsPageContent() {
       if (!payload.success) {
         throw new Error(payload.error || "Failed to load receipts");
       }
-      setReceipts(Array.isArray(payload.data) ? payload.data : []);
+      setReceipts(
+        Array.isArray(payload.data)
+          ? payload.data.map(normalizeReceipt).filter(isReceiptListItem)
+          : [],
+      );
       setError(null);
     } catch (fetchError: unknown) {
       setError(
@@ -156,6 +233,15 @@ export function ReceiptsPageContent() {
       date: receipt.date?.slice(0, 10) ?? "",
       time: receipt.time ?? "",
       category: receipt.category ?? "",
+      items:
+        receipt.items?.map((item) => ({
+          name: item.name ?? "",
+          price:
+            item.price === null || item.price === undefined
+              ? ""
+              : String(item.price),
+          category: item.category ?? "",
+        })) ?? [],
     });
   };
 
@@ -174,6 +260,26 @@ export function ReceiptsPageContent() {
     setActionError(null);
 
     try {
+      const parsedItems = editForm.items
+        .map((item) => {
+          const parsedPrice = item.price.trim();
+          const priceValue =
+            parsedPrice.length === 0 ? 0 : Number.parseFloat(parsedPrice);
+
+          if (Number.isNaN(priceValue)) {
+            throw new Error("Item prices must be valid numbers.");
+          }
+
+          return {
+            name: item.name.trim(),
+            price: Math.round(priceValue * 100) / 100,
+            category: item.category.trim() || undefined,
+          };
+        })
+        .filter(
+          (item) => item.name.length > 0 || item.category || item.price !== 0,
+        );
+
       const response = await fetch(`/api/receipts/${editingReceiptId}`, {
         method: "PATCH",
         headers: {
@@ -186,6 +292,7 @@ export function ReceiptsPageContent() {
           date: editForm.date || null,
           time: editForm.time.trim() || null,
           category: editForm.category.trim() || null,
+          items: parsedItems.length > 0 ? parsedItems : null,
         }),
       });
 
@@ -250,7 +357,15 @@ export function ReceiptsPageContent() {
       const matchesSearch =
         normalizedSearch.length === 0 ||
         (receipt.merchant ?? "").toLowerCase().includes(normalizedSearch) ||
-        (receipt.category ?? "").toLowerCase().includes(normalizedSearch);
+        (receipt.merchantBrand ?? "")
+          .toLowerCase()
+          .includes(normalizedSearch) ||
+        (receipt.category ?? "").toLowerCase().includes(normalizedSearch) ||
+        (receipt.items ?? []).some(
+          (item) =>
+            item.name.toLowerCase().includes(normalizedSearch) ||
+            (item.category ?? "").toLowerCase().includes(normalizedSearch),
+        );
 
       const matchesCategory =
         categoryFilter === "all-categories" ||
@@ -375,7 +490,8 @@ export function ReceiptsPageContent() {
                 <Input
                   value={searchValue}
                   onChange={(event) => setSearchValue(event.target.value)}
-                  placeholder="Merchant or category"
+                  placeholder="Merchant, brand, category, or item"
+                  aria-label="Search merchant, category, brand, or item"
                   className="h-10 rounded-lg pr-4 pl-11 text-sm"
                 />
               </label>
@@ -618,7 +734,10 @@ export function ReceiptsPageContent() {
           }
         }}
       >
-        <DialogContent showCloseButton={!isSavingEdit}>
+        <DialogContent
+          className="max-h-[90vh] overflow-y-auto"
+          showCloseButton={!isSavingEdit}
+        >
           <DialogHeader>
             <DialogTitle>Edit receipt</DialogTitle>
             <DialogDescription>
@@ -688,6 +807,132 @@ export function ReceiptsPageContent() {
                 }
                 placeholder="Category"
               />
+              <div className="space-y-2 rounded-xl border bg-muted/20 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="text-sm font-medium">Items</p>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() =>
+                      setEditForm((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              items: [
+                                ...prev.items,
+                                { name: "", price: "", category: "" },
+                              ],
+                            }
+                          : prev,
+                      )
+                    }
+                  >
+                    <PlusIcon size={14} />
+                    Add item
+                  </Button>
+                </div>
+                {editForm.items.length > 0 ? (
+                  <div className="space-y-2">
+                    {editForm.items.map((item, index) => (
+                      <div
+                        className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_110px_minmax(0,0.8fr)_auto]"
+                        key={`edit-item-${index}`}
+                      >
+                        <Input
+                          value={item.name}
+                          onChange={(event) =>
+                            setEditForm((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    items: prev.items.map((entry, entryIndex) =>
+                                      entryIndex === index
+                                        ? {
+                                            ...entry,
+                                            name: event.target.value,
+                                          }
+                                        : entry,
+                                    ),
+                                  }
+                                : prev,
+                            )
+                          }
+                          placeholder="Item name"
+                        />
+                        <Input
+                          type="number"
+                          step="0.01"
+                          value={item.price}
+                          onChange={(event) =>
+                            setEditForm((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    items: prev.items.map((entry, entryIndex) =>
+                                      entryIndex === index
+                                        ? {
+                                            ...entry,
+                                            price: event.target.value,
+                                          }
+                                        : entry,
+                                    ),
+                                  }
+                                : prev,
+                            )
+                          }
+                          placeholder="Price"
+                        />
+                        <Input
+                          value={item.category}
+                          onChange={(event) =>
+                            setEditForm((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    items: prev.items.map((entry, entryIndex) =>
+                                      entryIndex === index
+                                        ? {
+                                            ...entry,
+                                            category: event.target.value,
+                                          }
+                                        : entry,
+                                    ),
+                                  }
+                                : prev,
+                            )
+                          }
+                          placeholder="Item category"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          onClick={() =>
+                            setEditForm((prev) =>
+                              prev
+                                ? {
+                                    ...prev,
+                                    items: prev.items.filter(
+                                      (_, entryIndex) => entryIndex !== index,
+                                    ),
+                                  }
+                                : prev,
+                            )
+                          }
+                        >
+                          <TrashIcon size={14} />
+                          Remove
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground">
+                    No items saved for this receipt.
+                  </p>
+                )}
+              </div>
             </div>
           ) : null}
 
