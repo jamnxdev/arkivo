@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Dashboard",
   robots: {
     index: false,
     follow: false,
@@ -9,7 +8,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default function DashboardLayout({
+export default function AuthLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

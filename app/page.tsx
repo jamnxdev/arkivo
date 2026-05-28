@@ -3,6 +3,20 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { getSiteUrl } from "@/lib/utils";
+
+const siteUrl = getSiteUrl();
+const softwareApplicationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Arkivo",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web",
+  url: siteUrl,
+  description:
+    "AI-powered receipt tracking, expense analytics, and business document management for searchable spending records.",
+  image: `${siteUrl}/og-image.png`,
+};
 
 export default async function Page() {
   const { userId } = await auth();
@@ -13,6 +27,12 @@ export default async function Page() {
 
   return (
     <main className="min-h-svh bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(softwareApplicationJsonLd),
+        }}
+      />
       <div className="mx-auto flex min-h-svh w-full max-w-5xl items-center justify-center px-6 py-16">
         <section className="max-w-2xl space-y-8">
           <div className="space-y-4">

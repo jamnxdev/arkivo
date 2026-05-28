@@ -4,7 +4,8 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Arkivo",
     short_name: "Arkivo",
-    description: "AI-powered document and receipt tracking system.",
+    description:
+      "AI-powered receipt tracking, expense analytics, and business document management.",
     id: "/",
     scope: "/",
     start_url: "/",
