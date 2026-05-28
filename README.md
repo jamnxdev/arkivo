@@ -286,16 +286,6 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution rules, branch naming, 
 - Keep auth checks inside API routes even when UI routes are protected.
 - Prefer server-side signing for uploads and server-side deletion for temporary assets.
 
-## Roadmap
-
-The near-term work is tracked in [roadmap.md](./roadmap.md). Current priorities include:
-
-- Save-flow feedback and better error handling.
-- Frontend validation for totals, dates, and line items.
-- More ergonomic receipt editing.
-- Receipt image preview during review.
-- Broader test coverage for ingestion, receipt writes, and analytics.
-
 ## License
 
 Arkivo is licensed under the GNU Affero General Public License v3.0. See [LICENSE](./LICENSE).

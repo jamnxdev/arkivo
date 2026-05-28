@@ -17,8 +17,7 @@ Arkivo handles personal financial documents, so changes should prioritize:
 
 1. Read [README.md](./README.md) for product context.
 2. Read [DEVELOPMENT.md](./DEVELOPMENT.md) for local setup and architecture.
-3. Check [roadmap.md](./roadmap.md) for current priorities.
-4. Open an issue or discussion for large behavior changes before implementing them.
+3. Open an issue or discussion for large behavior changes before implementing them.
 
 ## Good First Contributions
 
