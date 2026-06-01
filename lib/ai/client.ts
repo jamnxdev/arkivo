@@ -34,7 +34,7 @@ export async function extractReceiptFromImage(input: {
   filename?: string;
 }) {
   const result = await generateText({
-    model: google("gemini-3.5-flash"),
+    model: google("gemini-2.5-flash-lite"),
     output: Output.object({ schema: receiptExtractionSchema }),
     messages: [
       {
@@ -73,7 +73,7 @@ Rules:
     ...result.output,
     currency: result.output.currency ?? "EUR",
     metadata: {
-      extractionModel: "gemini-3.1-flash-lite",
+      extractionModel: "gemini-2.5-flash-lite",
       extractionProvider: "google",
       sourceFilename: input.filename ?? null,
       sourceMimeType: input.mimeType,
